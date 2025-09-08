@@ -126,10 +126,12 @@ export const signUp = async (email, password, metadata = {}) => {
   }
 };
 
-export default {
+const supabaseUtils = {
   getSupabaseClient,
   addToWaitlist,
   trackGameInteraction,
   getSession,
   signUp
 };
+
+export default supabaseUtils;

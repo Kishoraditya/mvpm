@@ -6,7 +6,7 @@ import { useScrollEffects } from '@/hooks/useScrollEffects';
 
 const AnalyticsProvider = ({ children }) => {
   const { trackScrollDepth } = useAnalytics();
-  const { scrollY } = useScrollEffects();
+  useScrollEffects();
 
   useEffect(() => {
     // Track scroll depth events

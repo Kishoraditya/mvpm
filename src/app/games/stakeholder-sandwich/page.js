@@ -78,35 +78,31 @@ export default function StakeholderSandwichPage() {
     // Check for alternatives
     if (responses.includes('alternative') || responses.includes('option') || responses.includes('instead') || responses.includes('pivot')) {
       score += 1;
-      feedbackText += "Excellent strategic thinking with alternatives. ";
+      feedbackText += "Good consideration of alternatives. ";
     }
     
-    // Check for empathy
-    if (responses.includes('understand') || responses.includes('team') || responses.includes('concern')) {
-      score += 0.5;
-      feedbackText += "Good stakeholder empathy. ";
+    // Check for stakeholder awareness
+    if (responses.includes('stakeholder') || responses.includes('user') || responses.includes('customer') || responses.includes('team')) {
+      score += 1;
+      feedbackText += "Excellent stakeholder awareness. ";
     }
     
-    // Length check
-    const wordCount = userResponse.split(' ').length;
-    if (wordCount >= 10 && wordCount <= 50) {
-      score += 0.5;
-      feedbackText += "Perfect brevity. ";
-    } else if (wordCount > 50) {
-      feedbackText += "Consider being more concise - PMs must communicate efficiently. ";
+    // Check for urgency/timeline awareness
+    if (responses.includes('timeline') || responses.includes('deadline') || responses.includes('priority') || responses.includes('urgent')) {
+      score += 1;
+      feedbackText += "Great sense of urgency and prioritization. ";
     }
-    
-    feedbackText += "You're in the top 10% of PMs, but the real challenges haven't even started. Can you maintain this excellence when the stakes are higher?";
-    
+
     setFeedback(feedbackText);
+    setGameState('results');
     
-    // Track completion
-    trackEvent('game_completed', { 
-      game_name: 'stakeholder_sandwich',
+    trackEvent('game_completed', {
+      game: 'stakeholder_sandwich',
+      score: score,
       time_spent: 45 - timeLeft,
-      response_length: userResponse.length,
-      score: score
+      response_length: userResponse.length
     });
+    
     trackGameInteraction('stakeholder_sandwich', 'game_completed', {
       time_spent: 45 - timeLeft,
       response_length: userResponse.length,

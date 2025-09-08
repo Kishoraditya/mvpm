@@ -15,27 +15,21 @@ const eslintConfig = [
     rules: {
       // Disable problematic rules for deployment
       "@next/next/no-img-element": "off",
+      "@next/next/no-page-custom-font": "off",
+      "@next/next/no-html-link-for-pages": "off",
+      "react/no-unescaped-entities": "off",
       "react-hooks/exhaustive-deps": "warn",
       "no-unused-vars": "warn",
+      "import/no-anonymous-default-export": "warn",
+      // Allow console statements
       "no-console": "off",
-      // Allow empty catch blocks for error handling
-      "no-empty": ["error", { "allowEmptyCatch": true }],
-      // Allow any type for flexibility
-      "@typescript-eslint/no-explicit-any": "off",
-      // Disable strict prop-types checking
-      "react/prop-types": "off"
     },
     ignores: [
-      "node_modules/**",
       ".next/**",
+      "node_modules/**",
       "out/**",
       "build/**",
-      "next-env.d.ts",
-      "games/**",
-      "slides/**",
-      "stakeholder/**",
-      "stakeholder1/**",
-      "temp/**"
+      "dist/**",
     ],
   },
 ];
