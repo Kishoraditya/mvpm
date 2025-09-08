@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iterate: The Blueprint for Product Excellence - Hackathon Pitch</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+            line-height: 1.4;
+        }
+
+        .slide-container {
+            display: none;
+            min-height: 100vh;
+            padding: 2rem;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+        }
+
+        .slide-container.active {
+            display: flex;
+        }
+
+        /* Navigation */
+        .slide-nav {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 1rem;
+            z-index: 1000;
+            background: rgba(15, 15, 35, 0.9);
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-btn {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .nav-btn:hover {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: #667eea;
+            color: #ffffff;
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+            color: #ffffff;
+        }
+
+        /* Slide progress */
+        .slide-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+            z-index: 1001;
+        }
+
+        /* Typography */
+        .slide-title {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 900;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #ffffff 0%, #667eea 50%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.1;
+        }
+
+        .slide-subtitle {
+            font-size: clamp(1.2rem, 2.5vw, 2rem);
+            color: #667eea;
+            margin-bottom: 2rem;
+            font-weight: 700;
+        }
+
+        .slide-content {
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .tagline {
+            font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 2rem;
+            font-weight: 300;
+        }
+
+        /* Problem slide styling */
+        .problem-points {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .problem-card {
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(238, 90, 82, 0.1));
+            border: 2px solid rgba(255, 107, 107, 0.3);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: left;
+        }
+
+        .problem-card h3 {
+            font-size: 1.3rem;
+            color: #ff6b6b;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .problem-card p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+        }
+
+        /* Games grid */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .game-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+
+        .game-timer {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .game-card h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #ffffff;
+        }
+
+        .game-card p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin: 3rem 0;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Business outcomes */
+        .outcomes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .outcome-card {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: left;
+        }
+
+        .outcome-card h3 {
+            font-size: 1.3rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+
+        .outcome-card ul {
+            list-style: none;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .outcome-card li {
+            margin-bottom: 0.5rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .outcome-card li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        /* Tech stack */
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .tech-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .tech-item:hover {
+            background: rgba(102, 126, 234, 0.1);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+
+        .tech-item h4 {
+            font-size: 1rem;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .tech-item p {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* CTA buttons */
+        .cta-button {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            margin: 1rem 0.5rem;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Quote styling */
+        .quote {
+            font-size: 1.3rem;
+            font-style: italic;
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+            padding: 2rem;
+            border-radius: 20px;
+            border-left: 4px solid #667eea;
+            margin: 2rem 0;
+        }
+
+        /* Slide-specific styles */
+        .slide-1 { background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%); }
+        .slide-2 { background: linear-gradient(135deg, #2d1b69 0%, #1a1a2e 50%, #0f0f23 100%); }
+        .slide-3 { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%); }
+
+        /* Coming soon scroll */
+        .coming-soon-scroll {
+            display: flex;
+            gap: 2rem;
+            overflow-x: auto;
+            padding: 2rem 0;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .coming-soon-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .pipeline-item {
+            flex: 0 0 250px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+        }
+
+        .pipeline-item h4 {
+            font-size: 1.1rem;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+
+        .pipeline-item p {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .slide-container {
+                padding: 1rem;
+            }
+            
+            .games-grid,
+            .problem-points,
+            .outcomes-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                gap: 2rem;
+            }
+            
+            .slide-nav {
+                bottom: 1rem;
+                padding: 0.5rem 1rem;
+                gap: 0.5rem;
+            }
+            
+            .nav-btn {
+                padding: 0.3rem 0.6rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Animation classes */
+        .fade-in {
+            animation: fadeIn 1s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide-in-left {
+            animation: slideInLeft 0.8s ease-out;
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-progress"></div>
+
+    <!-- Slide 1: Title -->
+    <div class="slide-container active slide-1" id="slide-1">
+        <div class="slide-content fade-in">
+            <h1 class="slide-title">iterate</h1>
+            <p class="tagline">The Blueprint for Product Excellence</p>
+            <p class="slide-subtitle">Do You Have What It Takes to Be MVPM?</p>
+            <p style="font-size: 1.2rem; color: rgba(255, 255, 255, 0.7); margin: 2rem 0;">
+                Most Valuable Product Manager isn't just a title—it's earned through split-second decisions, razor-sharp thinking, and the ability to thrive under pressure.
+            </p>
+            <p style="font-size: 1rem; color: #667eea; margin-top: 2rem;">
+                🏆 HackAI 2025 • Team iterate • Built in 48 hours
+            </p>
+        </div>
+    </div>
+
+    <!-- Slide 2: The Problem -->
+    <div class="slide-container slide-2" id="slide-2">
+        <div class="slide-content">
+            <h1 class="slide-title">The Brutal Truth</h1>
+            <p class="slide-subtitle">🚨 Cognitive Atrophy & Broken PM Hiring</p>
+            
+            <div class="problem-points">
+                <div class="problem-card">
+                    <h3>🧠 Mental Muscle Atrophy</h3>
+                    <p>Over-reliance on AI is making PMs weaker at critical thinking, problem decomposition, and bias awareness. We're creating "managers of prompts, not products."</p>
+                </div>
+                
+                <div class="problem-card">
+                    <h3>💔 Broken Hiring Process</h3>
+                    <p>Resumes don't reveal real product sense. Recruiters struggle to evaluate judgment, adaptability, strategy, and creativity objectively.</p>
+                </div>
+                
+                <div class="problem-card">
+                    <h3>🎯 No Practice Arena</h3>
+                    <p>PMs rarely get to "practice" their craft in a safe, fun way. Traditional case studies feel heavy, unrealistic, and stressful.</p>
+                </div>
+            </div>
+
+            <div class="quote">
+                "We asked: What if PMs had a Wordle for product thinking? What if we could measure the unmeasurable—product sense, strategic thinking, decision-making under pressure?"
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: Our Approach -->
+    <div class="slide-container slide-3" id="slide-3">
+        <div class="slide-content">
+            <h1 class="slide-title">The Daily Gauntlet</h1>
+            <p class="slide-subtitle">Fun-First Gamified Learning That Actually Works</p>
+            
+            <div class="games-grid">
+                <div class="game-card">
+                    <span class="game-timer">BRUTAL 45s</span>
+                    <h3>Stakeholder Sandwich</h3>
+                    <p>45 seconds. One impossible request. Your reputation on the line. Draft the perfect response.</p>
+                </div>
+                
+                <div class="game-card">
+                    <span class="game-timer">LIGHTNING 10s</span>
+                    <h3>Chart-in-10</h3>
+                    <p>10 seconds to read a chart. Keep or kill? Your call could make or break the quarter.</p>
+                </div>
+                
+                <div class="game-card">
+                    <span class="game-timer">SURGICAL 40s</span>
+                    <h3>Assumption Sniper</h3>
+                    <p>Find exactly 3 hidden assumptions that could tank this feature. Miss one, pay the price.</p>
+                </div>
+                
+                <div class="game-card">
+                    <span class="game-timer">CHAOS 5min</span>
+                    <h3>Sprint Simulator</h3>
+                    <p>5-week product sprint compressed into split-second decisions. Ship or sink.</p>
+                </div>
+            </div>
+
+            <div class="quote">
+                "We designed daily 5-minute games that feel fun & playful. No business plan initially—just pure challenge. But then something magical happened..."
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: The Insight -->
+    <div class="slide-container" id="slide-4">
+        <div class="slide-content">
+            <h1 class="slide-title">The Surprise Discovery</h1>
+            <p class="slide-subtitle">Serious Business Outcomes as a Side Effect of Play</p>
+            
+            <div style="font-size: 1.3rem; color: rgba(255, 255, 255, 0.9); margin: 2rem 0; line-height: 1.6;">
+                When we tested it, people loved the playfulness and daily engagement.<br><br>
+                But recruiters, researchers, and PMs themselves gave us unexpected feedback:
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin: 3rem 0;">
+                <div style="background: rgba(102, 126, 234, 0.1); padding: 2rem; border-radius: 20px; border-left: 4px solid #667eea;">
+                    <p style="font-size: 1.1rem; font-style: italic; color: #ffffff;">
+                        "This is the skill we can't measure in interviews."
+                    </p>
+                </div>
+                <div style="background: rgba(102, 126, 234, 0.1); padding: 2rem; border-radius: 20px; border-left: 4px solid #667eea;">
+                    <p style="font-size: 1.1rem; font-style: italic; color: #ffffff;">
+                        "If you captured this data, we'd pay for it."
+                    </p>
+                </div>
+                <div style="background: rgba(102, 126, 234, 0.1); padding: 2rem; border-radius: 20px; border-left: 4px solid #667eea;">
+                    <p style="font-size: 1.1rem; font-style: italic; color: #ffffff;">
+                        "This could train AI models on real reasoning."
+                    </p>
+                </div>
+            </div>
+
+            <div class="quote">
+                "We didn't set out to build a business. We set out to build a game... But we discovered this game captures the hardest things to measure: reasoning, strategy, product sense. That's the magic of iterate."
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Our Mission -->
+    <div class="slide-container" id="slide-5">
+        <div class="slide-content">
+            <h1 class="slide-title">Sharpening Minds in the AI Era</h1>
+            <p class="slide-subtitle">AI as Coach, Not Crutch</p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin: 3rem 0;">
+                <div style="text-align: left; background: rgba(255, 255, 255, 0.05); padding: 2rem; border-radius: 20px;">
+                    <h3 style="color: #667eea; margin-bottom: 1rem; font-size: 1.3rem;">🎯 Flip the Script</h3>
+                    <p style="color: rgba(255, 255, 255, 0.8);">You play WITH AI, but you don't offload the hard part. AI becomes a coach, not a crutch—scoring, nudging, and bias-explaining.</p>
+                </div>
+                
+                <div style="text-align: left; background: rgba(255, 255, 255, 0.05); padding: 2rem; border-radius: 20px;">
+                    <h3 style="color: #667eea; margin-bottom: 1rem; font-size: 1.3rem;">💪 Strengthen Mental Muscles</h3>
+                    <p style="color: rgba(255, 255, 255, 0.8);">Force fast, sharp decision-making under constraints. Strengthen critical thinking, creativity, and bias awareness instead of atrophying them.</p>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat">
+                    <div class="stat-number">&lt; 1%</div>
+                    <div class="stat-label">Score perfect 10/10 on all challenges</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">47s</div>
+                    <div class="stat-label">Average time to complete all challenges</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">89%</div>
+                    <div class="stat-label">Come back tomorrow for another round</div>
+                </div>
+            </div>
+
+            <div class="quote">
+                "While most AI tools risk dulling our minds, we're building iterate to sharpen them. We want PMs who can think critically, creatively, and ethically WITH AI, not BECAUSE of it."
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: The Solution -->
+    <div class="slide-container" id="slide-6">
+        <div class="slide-content">
+            <h1 class="slide-title">The Solution: Iterate</h1>
+            <p class="slide-subtitle">Play, Learn, Prove</p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; margin: 2rem 0;">
+                <div style="background: rgba(255, 255, 255, 0.05); padding: 2rem; border-radius: 20px; text-align: left;">
+                    <h3 style="color: #667eea; margin-bottom: 1rem;">⚡ Lightning Fast</h3>
+                    <p style="color: rgba(255, 255, 255, 0.8);">Daily session = 4 scenarios, each under 1 minute. No signup required for anonymous play.</p>
+                </div>
+                
+                <div style="background: rgba(255, 255, 255, 0.05); padding: 2rem; border-radius: 20px; text-align: left;">
+                    <h3 style="color: #667eea; margin-bottom: 1rem;">🧠 AI-Powered Scoring</h3>
+                    <p style="color: rgba(255, 255, 255, 0.8);">Instant feedback with multi-dimensional "PM DNA" profile. Objective analysis of thinking patterns.</p>
+                </div>
+                
+                <div style="background: rgba(255, 255, 255, 0.05); padding: 2rem; border-radius: 20px; text-align: left;">
+                    <h3 style="color: #667eea; margin-bottom: 1rem;">🏆 Competitive Edge</h3>
+                    <p style="color: rgba(255, 255, 255, 0.8);">Leaderboard with Quadratic Voting. Players use daily tokens to vote on top answers.</p>
+                </div>
+                
+                <div style="background: rgba(255, 255, 255, 0.05); padding: 2rem; border-radius: 20px; text-align: left;">
+                    <h3 style="color: #667eea; margin-bottom: 1rem;">📊 Real-World Impact</h3>
+                    <p style="color: rgba(255, 255, 255, 0.8);">End-of-day solutions, explanations, and real-world applicability. Learn from the best.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 7: Tech Stack -->
+    <div class="slide-container" id="slide-7">
+        <div class="slide-content">
+            <h1 class="slide-title">Modern AI Stack</h1>
+            <p class="slide-subtitle">Built with Cutting-Edge Tools</p>
+            
+            <div class="tech-grid">
+                <div class="tech-item">
+                    <h4>Windsurf</h4>
+                    <p>Core flows & rapid development</p>
+                </div>
+                <div class="tech-item">
+                    <h4>Rocket.new</h4>
+                    <p>High-fidelity wireframes</p>
+                </div>
+                <div class="tech-item">
+                    <h4>Claude</h4>
+                    <p>Strategy brainstorming & analysis</p>
+                </div>
+                <div class="tech-item">
+                    <h4>Gemini</h4>
+                    <p>Game mechanics APIs</p>
+                </div>
+                <div class="tech-item">
+                    <h4>ChatGPT</h4>
+                    <p>Scoring engine</p>
+                </div>
+                <div class="tech-item">
+                    <h4>Perplexity</h4>
+                    <p>Research & knowledge grounding</p>
+                </div>
+                <div class="tech-item">
+                    <h4>NotebookLM</h4>
+                    <p>Synthesis & condensing</p>
+                </div>
+                <div class="tech-item">
+                    <h4>DSPy + Opik</h4>
+                    <p>Prompt tuning & evaluations</p>
+                </div>
+            </div>
+
+            <div style="background: rgba(102, 126, 234, 0.1); padding: 2rem; border-radius: 20px; margin: 2rem 0;">
+                <h3 style="color: #667eea; margin-bottom: 1rem;">🤖 Underlying Philosophy</h3>
+                <p style="color: rgba(255, 255, 255, 0.9); font-size: 1.1rem;">
+                    Leveraging LLMs as <strong>"Creator Agents"</strong> to generate puzzles and <strong>"Judge Agents"</strong> to score answers consistently.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 8: Business Outcomes -->
+    <div class="slide-container" id="slide-8">
+        <div class="slide-content">
+            <h1 class="slide-title">Business Outcomes</h1>
+            <p class="slide-subtitle">The Side Effects of Play</p>
+            
+            <div class="outcomes-grid">
+                <div class="outcome-card">
+                    <h3>For PMs</h3>
+                    <ul>
+                        <li>Playful daily practice leads to self-awareness</li>
+                        <li>Skill growth through real scenarios</li>
+                        <li>Shareable portfolio of validated decisions</li>
+                        <li>MVPM bragging rights</li>
+                    </ul>
+                </div>
+                
+                <div class="outcome-card">
+                    <h3>For Organizations</h3>
+                    <ul>
+                        <li>Hire PMs based on what they DO, not what they SAY</li>
+                        <li>Anonymized PM DNA Profiles for objective assessment</li>
+                        <li>Community-sourced decision vetting</li>
+                        <li>Internal L&D and skills assessment</li>
+                    </ul>
+                </div>
+                
+                <div class="outcome-card">
+                    <h3>For AI Research</h3>
+                    <ul>
+                        <li>Anonymized reasoning traces dataset</li>
+                        <li>Decision-making under pressure data</li>
+                        <li>Bias awareness training data</li>
+                        <li>License data to AI labs for PM-focused copilots</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 9: Future Vision -->
+    <div class="slide-container" id="slide-9">
+        <div class="slide-content">
+            <h1 class="slide-title">Future: The Reasoning Gym</h1>
+            <p class="slide-subtitle">Beyond the MVP</p>
+            
+            <div class="coming-soon-scroll">
+                <div class="pipeline-item">
+                    <span class="status-badge">Coming Soon</span>
+                    <h4>Rule Seeker</h4>
+                    <p>Find patterns. Test hypotheses. Watch confirmation bias destroy you.</p>
+                </div>
+                <div class="pipeline-item">
+                    <span class="status-badge">Coming Soon</span>
+                    <h4>Ethics Toggle</h4>
+                    <p>Privacy vs profit. User safety vs growth. Define yourself.</p>
+                </div>
+                <div class="pipeline-item">
+                    <span class="status-badge">Coming Soon</span>
+                    <h4>Prompt Design Puzzle</h4>
+                    <p>Get AI to do exactly what you want. Harder than it sounds.</p>
+                </div>
+                <div class="pipeline-item">
+                    <span class="status-badge">Coming Soon</span>
+                    <h4>Fallacy Finder</h4>
+                    <p>Spot logical traps in product arguments. Your reasoning under fire.</p>
+                </div>
+            </div>
+
+            <div style="margin: 3rem 0; text-align: left;">
+                <h3 style="color: #667eea; margin-bottom: 2rem; font-size: 1.5rem; text-align: center;">🏢 Enterprise Arsenal</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                    <div style="background: rgba(255, 255, 255, 0.05); padding: 1.5rem; border-radius: 15px;">
+                        <h4 style="color: #4facfe; margin-bottom: 0.5rem;">Recruiter Command Center</h4>
+                        <p style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem;">Stop guessing. Start knowing. Candidate PM DNA profiles with surgical precision.</p>
+                    </div>
+                    <div style="background: rgba(255, 255, 255, 0.05); padding: 1.5rem; border-radius: 15px;">
+                        <h4 style="color: #4facfe; margin-bottom: 0.5rem;">Team Battle Royale</h4>
+                        <p style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem;">Private company challenges. Your real problems. Your team's collective genius.</p>
+                    </div>
+                    <div style="background: rgba(255, 255, 255, 0.05); padding: 1.5rem; border-radius: 15px;">
+                        <h4 style="color: #4facfe; margin-bottom: 0.5rem;">Decision Science Lab</h4>
+                        <p style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem;">Your reasoning patterns fuel the future of product decision-making.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quote">
+                "For PMs: More than practice—a blueprint for mastery.<br>
+                For Recruiters: Finally measure 'product sense,' not just resumes.<br>
+                For the World: Fun → insight → better products → better decisions."
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 10: Call to Action -->
+    <div class="slide-container" id="slide-10">
+        <div class="slide-content">
+            <h1 class="slide-title">Ready to Prove You're MVPM?</h1>
+            <p class="slide-subtitle">Let's Make Hiring Smarter, Learning Fun, and AI More Human</p>
+            
+            <div style="margin: 3rem 0;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 3rem; margin: 3rem 0;">
+                    <div style="text-align: center;">
+                        <h3 style="color: #667eea; margin-bottom: 1rem; font-size: 1.5rem;">🎮 Try It Now</h3>
+                        <p style="color: rgba(255, 255, 255, 0.8); margin-bottom: 2rem;">Five minutes. Four challenges. One chance to prove you've got what it takes.</p>
+                        <a href="#" class="cta-button">Start the Challenge</a>
+                        <p style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.6); margin-top: 1rem;">✓ No signup required ✓ Anonymous play ✓ Instant results</p>
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <h3 style="color: #667eea; margin-bottom: 1rem; font-size: 1.5rem;">🚀 Join Waitlist</h3>
+                        <p style="color: rgba(255, 255, 255, 0.8); margin-bottom: 2rem;">Be first to arm your organization with MVPM intelligence</p>
+                        <a href="#" class="cta-button">Get Early Access</a>
+                        <p style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.6); margin-top: 1rem;">✓ Enterprise features ✓ Team battles ✓ Custom challenges</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: rgba(102, 126, 234, 0.1); padding: 2rem; border-radius: 20px; margin: 3rem 0;">
+                <h3 style="color: #667eea; margin-bottom: 1rem;">🏆 Think You Can Challenge Your CPO?</h3>
+                <p style="color: rgba(255, 255, 255, 0.9); font-size: 1.1rem;">
+                    Share your MVPM score and see if your leadership has what it takes. Most don't.
+                </p>
+            </div>
+
+            <div style="margin-top: 4rem; font-size: 1.1rem;">
+                <p style="color: #667eea; margin-bottom: 1rem;">📧 Contact: kishoradityasc@gmail.com</p>
+                <p style="color: #667eea; margin-bottom: 1rem;">🔗 Demo: https://mvpm.onrender.com/</p>
+                <p style="color: #667eea;">💻 GitHub: https://github.com/Kishoraditya/mvpm</p>
+            </div>
+
+            <p style="color: rgba(255, 255, 255, 0.6); font-size: 0.9rem; margin-top: 3rem;">
+                Where product legends are born, one challenge at a time.
+            </p>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="slide-nav">
+        <button class="nav-btn active" onclick="goToSlide(1)">1</button>
+        <button class="nav-btn" onclick="goToSlide(2)">2</button>
+        <button class="nav-btn" onclick="goToSlide(3)">3</button>
+        <button class="nav-btn" onclick="goToSlide(4)">4</button>
+        <button class="nav-btn" onclick="goToSlide(5)">5</button>
+        <button class="nav-btn" onclick="goToSlide(6)">6</button>
+        <button class="nav-btn" onclick="goToSlide(7)">7</button>
+        <button class="nav-btn" onclick="goToSlide(8)">8</button>
+        <button class="nav-btn" onclick="goToSlide(9)">9</button>
+        <button class="nav-btn" onclick="goToSlide(10)">10</button>
+        <button class="nav-btn" onclick="previousSlide()">←</button>
+        <button class="nav-btn" onclick="nextSlide()">→</button>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 10;
+
+        function updateProgress() {
+            const progress = (currentSlide / totalSlides) * 100;
+            document.querySelector('.slide-progress').style.width = progress + '%';
+        }
+
+        function showSlide(n) {
+            // Hide all slides
+            document.querySelectorAll('.slide-container').forEach(slide => {
+                slide.classList.remove('active');
+            });
+            
+            // Show current slide
+            document.getElementById('slide-' + n).classList.add('active');
+            
+            // Update nav buttons
+            document.querySelectorAll('.nav-btn').forEach((btn, index) => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`button[onclick="goToSlide(${n})"]`).classList.add('active');
+            
+            // Update progress
+            updateProgress();
+            
+            // Add animation class
+            document.getElementById('slide-' + n).querySelector('.slide-content').classList.add('fade-in');
+        }
+
+        function goToSlide(n) {
+            if (n >= 1 && n <= totalSlides) {
+                currentSlide = n;
+                showSlide(currentSlide);
+            }
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                showSlide(currentSlide);
+            }
+        }
+
+        function previousSlide() {
+            if (currentSlide > 1) {
+                currentSlide--;
+                showSlide(currentSlide);
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowRight' || event.key === ' ') {
+                event.preventDefault();
+                nextSlide();
+            } else if (event.key === 'ArrowLeft') {
+                event.preventDefault();
+                previousSlide();
+            } else if (event.key >= '1' && event.key <= '9') {
+                const slideNum = parseInt(event.key);
+                if (slideNum <= totalSlides) {
+                    goToSlide(slideNum);
+                }
+            } else if (event.key === '0') {
+                goToSlide(10);
+            }
+        });
+
+        // Touch/swipe support for mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', function(event) {
+            touchStartX = event.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', function(event) {
+            touchEndX = event.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            const diff = touchStartX - touchEndX;
+            
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    // Swipe left - next slide
+                    nextSlide();
+                } else {
+                    // Swipe right - previous slide
+                    previousSlide();
+                }
+            }
+        }
+
+        // Auto-advance demo (optional - remove for manual control)
+        // setInterval(() => {
+        //     if (currentSlide < totalSlides) {
+        //         nextSlide();
+        //     } else {
+        //         goToSlide(1); // Loop back to start
+        //     }
+        // }, 15000); // 15 seconds per slide
+
+        // Initialize
+        updateProgress();
+        
+        // Add some dynamic elements
+        document.querySelectorAll('.game-card, .problem-card, .outcome-card').forEach((card, index) => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-10px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Add pulse animation to CTA buttons
+        document.querySelectorAll('.cta-button').forEach(btn => {
+            btn.addEventListener('mouseenter', function() {
+                this.style.animation = 'pulse 1s infinite';
+            });
+            
+            btn.addEventListener('mouseleave', function() {
+                this.style.animation = 'none';
+            });
+        });
+
+        // Add floating animation to stats
+        document.querySelectorAll('.stat-number').forEach((stat, index) => {
+            stat.style.animationDelay = (index * 0.2) + 's';
+            stat.classList.add('float');
+        });
+
+        // Presentation mode toggle
+        let presentationMode = false;
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'F' || event.key === 'f') {
+                if (!presentationMode) {
+                    document.documentElement.requestFullscreen();
+                    document.querySelector('.slide-nav').style.display = 'none';
+                    presentationMode = true;
+                } else {
+                    document.exitFullscreen();
+                    document.querySelector('.slide-nav').style.display = 'flex';
+                    presentationMode = false;
+                }
+            }
+        });
+
+        console.log(`
+🎮 iterate Hackathon Pitch Deck
+===============================
+Navigation:
+→ Arrow keys or Space: Next/Previous slide  
+→ Numbers 1-0: Jump to specific slide
+→ F: Toggle fullscreen presentation mode
+→ Swipe left/right on mobile
+
+Built with ❤️ in 48 hours for HackAI 2025
+        `);
+    </script>
+</body>
+</html>

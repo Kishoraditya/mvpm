@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stakeholder Sandwich - The Ultimate PM Challenge</title>
+    <link rel="stylesheet" href="stakeholder_sandwich.css">
+    <script src="config.js"></script>
+    <script src="analytics.js"></script>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/" class="logo">iterate</a>
+            <a href="/" class="back-home">← Back to Home</a>
+        </nav>
+    </header>
+
+    <div class="game-container">
+        <div class="game-header">
+            <h1 class="game-title">Stakeholder Sandwich</h1>
+            <p class="game-subtitle">45 seconds. One impossible request. Your reputation on the line.</p>
+            <span class="brutal-timer">BRUTAL 45s</span>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading-state" class="game-state active">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">Generating your nightmare scenario...</p>
+        </div>
+
+        <!-- Game State -->
+        <div id="game-state" class="game-state">
+            <div class="scenario-box">
+                <h3 class="scenario-title">🔥 Your Challenge</h3>
+                <div id="scenario-text" class="scenario-text">
+                    <!-- Scenario will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <div class="timer-display">
+                <div id="timer-circle" class="timer-circle">45</div>
+                <p class="timer-text">seconds remaining</p>
+            </div>
+
+            <div class="response-area">
+                <label class="response-label">Draft your response (1-2 sentences, include a metric or alternative):</label>
+                <textarea 
+                    id="response-input" 
+                    class="response-input" 
+                    placeholder="Your response here... Remember: clarity, strategy, empathy, evidence, brevity."
+                    maxlength="500"
+                ></textarea>
+                <div id="character-count" class="character-count">0/500 characters</div>
+            </div>
+
+            <div class="action-buttons">
+                <button id="submit-btn" class="btn btn-primary">Submit Response</button>
+                <button id="skip-btn" class="btn btn-secondary">Skip Challenge</button>
+            </div>
+        </div>
+
+        <!-- Results State -->
+        <div id="results-state" class="game-state">
+            <div class="results-content">
+                <div id="performance-badge" class="performance-badge">
+                    🎯 Top 10% Performance
+                </div>
+
+                <div class="feedback-section">
+                    <h3 class="feedback-title">AI Analysis</h3>
+                    <div id="ai-feedback" class="feedback-text">
+                        <!-- AI feedback will be populated here -->
+                    </div>
+                </div>
+
+                <div class="social-share">
+                    <h3 class="social-title">🚀 Share Your MVPM Moment</h3>
+                    <div class="social-buttons">
+                        <a href="#" id="linkedin-share" class="social-btn linkedin">
+                            <span>📊</span> LinkedIn
+                        </a>
+                        <a href="#" id="twitter-share" class="social-btn twitter">
+                            <span>🐦</span> Twitter
+                        </a>
+                        <a href="#" id="reddit-share" class="social-btn reddit">
+                            <span>🤖</span> Reddit
+                        </a>
+                    </div>
+                </div>
+
+                <div class="next-steps">
+                    <h3>🔥 This is just the beginning...</h3>
+                    <p>Think that was tough? The AI revolution demands cognitive excellence. Can you survive without cognitive atrophy? Help our AI improve by sharing feedback and conquering more challenges.</p>
+                    
+                    <div class="cta-grid">
+                        <a href="#" class="btn btn-primary" onclick="restartGame()">Play Again</a>
+                        <a href="/#signup" class="btn btn-secondary">Join Waitlist</a>
+                        <a href="/#coming-soon" class="btn btn-secondary">Enterprise Arsenal</a>
+                        <a href="/" class="btn btn-secondary">More Games</a>
+                    </div>
+                </div>
+
+                <!-- Feedback Form -->
+                <div class="feedback-section">
+                    <h3 class="feedback-title">Help Us Improve</h3>
+                    <textarea 
+                        id="user-feedback" 
+                        class="response-input" 
+                        placeholder="How was the challenge? Any suggestions for improvement? We're just starting out and your input shapes our AI..."
+                        style="min-height: 80px;"
+                    ></textarea>
+                    <div style="text-align: center; margin-top: 1rem;">
+                        <button id="feedback-submit" class="btn btn-primary">Send Feedback</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="stakeholder_sandwich.js"></script>
+</body>
+</html>

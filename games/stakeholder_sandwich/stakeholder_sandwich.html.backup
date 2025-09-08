@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stakeholder Sandwich - The Ultimate PM Challenge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            backdrop-filter: blur(20px);
+            background: rgba(15, 15, 35, 0.9);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1000;
+            padding: 1rem 2rem;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .back-home {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .back-home:hover {
+            color: #667eea;
+        }
+
+        /* Game Container */
+        .game-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 6rem 2rem 2rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .game-title {
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .game-subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 1rem;
+        }
+
+        .brutal-timer {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+        }
+
+        /* Game States */
+        .game-state {
+            display: none;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-state.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Loading State */
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 2rem auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 1rem;
+        }
+
+        /* Scenario Display */
+        .scenario-box {
+            background: rgba(255, 107, 107, 0.1);
+            border: 2px solid rgba(255, 107, 107, 0.3);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .scenario-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #ff6b6b;
+            margin-bottom: 1rem;
+        }
+
+        .scenario-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* Timer Display */
+        .timer-display {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .timer-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 900;
+            margin: 0 auto 1rem;
+            animation: pulse 1s infinite;
+        }
+
+        .timer-circle.warning {
+            animation: fastPulse 0.5s infinite;
+            background: linear-gradient(135deg, #ff4757, #c44569);
+        }
+
+        @keyframes fastPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .timer-text {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Response Input */
+        .response-area {
+            margin-bottom: 2rem;
+        }
+
+        .response-label {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #ffffff;
+        }
+
+        .response-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            color: white;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .response-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .response-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .character-count {
+            text-align: right;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 0.5rem;
+        }
+
+        .character-count.warning {
+            color: #ff6b6b;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+        }
+
+        /* Results Display */
+        .results-content {
+            text-align: center;
+        }
+
+        .performance-badge {
+            display: inline-block;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+        }
+
+        .feedback-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: left;
+        }
+
+        .feedback-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #4ecdc4;
+            margin-bottom: 1rem;
+        }
+
+        .feedback-text {
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        /* Social Sharing */
+        .social-share {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .social-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .social-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .social-btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .linkedin { background: #0077b5; color: white; }
+        .twitter { background: #1da1f2; color: white; }
+        .reddit { background: #ff4500; color: white; }
+
+        .social-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Next Steps */
+        .next-steps {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .next-steps h3 {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            color: #667eea;
+        }
+
+        .next-steps p {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 1.5rem;
+        }
+
+        .cta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 2rem;
+            }
+            
+            .game-state {
+                padding: 1.5rem;
+            }
+            
+            .social-buttons {
+                flex-direction: column;
+            }
+            
+            .cta-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/" class="logo">iterate</a>
+            <a href="/" class="back-home">← Back to Home</a>
+        </nav>
+    </header>
+
+    <div class="game-container">
+        <div class="game-header">
+            <h1 class="game-title">Stakeholder Sandwich</h1>
+            <p class="game-subtitle">45 seconds. One impossible request. Your reputation on the line.</p>
+            <span class="brutal-timer">BRUTAL 45s</span>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading-state" class="game-state active">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">Generating your nightmare scenario...</p>
+        </div>
+
+        <!-- Game State -->
+        <div id="game-state" class="game-state">
+            <div class="scenario-box">
+                <h3 class="scenario-title">🔥 Your Challenge</h3>
+                <div id="scenario-text" class="scenario-text">
+                    <!-- Scenario will be populated by AI -->
+                </div>
+            </div>
+
+            <div class="timer-display">
+                <div id="timer-circle" class="timer-circle">45</div>
+                <p class="timer-text">seconds remaining</p>
+            </div>
+
+            <div class="response-area">
+                <label class="response-label">Draft your response (1-2 sentences, include a metric or alternative):</label>
+                <textarea 
+                    id="response-input" 
+                    class="response-input" 
+                    placeholder="Your response here... Remember: clarity, strategy, empathy, evidence, brevity."
+                    maxlength="500"
+                ></textarea>
+                <div id="character-count" class="character-count">0/500 characters</div>
+            </div>
+
+            <div class="action-buttons">
+                <button id="submit-btn" class="btn btn-primary">Submit Response</button>
+                <button id="skip-btn" class="btn btn-secondary">Skip Challenge</button>
+            </div>
+        </div>
+
+        <!-- Results State -->
+        <div id="results-state" class="game-state">
+            <div class="results-content">
+                <div id="performance-badge" class="performance-badge">
+                    🎯 Top 10% Performance
+                </div>
+
+                <div class="feedback-section">
+                    <h3 class="feedback-title">AI Analysis</h3>
+                    <div id="ai-feedback" class="feedback-text">
+                        <!-- AI feedback will be populated here -->
+                    </div>
+                </div>
+
+                <div class="social-share">
+                    <h3 class="social-title">🚀 Share Your MVPM Moment</h3>
+                    <div class="social-buttons">
+                        <a href="#" id="linkedin-share" class="social-btn linkedin">
+                            <span>📊</span> LinkedIn
+                        </a>
+                        <a href="#" id="twitter-share" class="social-btn twitter">
+                            <span>🐦</span> Twitter
+                        </a>
+                        <a href="#" id="reddit-share" class="social-btn reddit">
+                            <span>🤖</span> Reddit
+                        </a>
+                    </div>
+                </div>
+
+                <div class="next-steps">
+                    <h3>🔥 This is just the beginning...</h3>
+                    <p>Think that was tough? The AI revolution demands cognitive excellence. Can you survive without cognitive atrophy? Help our AI improve by sharing feedback and conquering more challenges.</p>
+                    
+                    <div class="cta-grid">
+                        <a href="#" class="btn btn-primary" onclick="restartGame()">Play Again</a>
+                        <a href="/#signup" class="btn btn-secondary">Join Waitlist</a>
+                        <a href="/#coming-soon" class="btn btn-secondary">Enterprise Arsenal</a>
+                        <a href="/" class="btn btn-secondary">More Games</a>
+                    </div>
+                </div>
+
+                <!-- Feedback Form -->
+                <div class="feedback-section">
+                    <h3 class="feedback-title">Help Us Improve</h3>
+                    <textarea 
+                        id="user-feedback" 
+                        class="response-input" 
+                        placeholder="How was the challenge? Any suggestions for improvement? We're just starting out and your input shapes our AI..."
+                        style="min-height: 80px;"
+                    ></textarea>
+                    <div style="text-align: center; margin-top: 1rem;">
+                        <button id="feedback-submit" class="btn btn-primary">Send Feedback</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class StakeholderSandwichGame {
+            constructor() {
+                this.timeLeft = 45;
+                this.timerInterval = null;
+                this.gameStarted = false;
+                this.scenario = null;
+                this.userResponse = '';
+                
+                this.initializeGame();
+            }
+
+            async initializeGame() {
+                // Simulate AI scenario generation
+                await this.generateScenario();
+                this.showGameState();
+                this.setupEventListeners();
+            }
+
+            async generateScenario() {
+                // Simulate API call delay
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // Sample scenarios (in production, this would come from your AI API)
+                const scenarios = [
+                    {
+                        title: "The Impossible Trinity",
+                        text: "Sales needs the enterprise feature shipped yesterday, Engineering says it needs 6 more weeks for security review, and your CEO just promised it to our biggest prospect in the board meeting. The prospect represents 40% revenue growth but won't wait past Friday. Your move."
+                    },
+                    {
+                        title: "Feature Frankenstein",
+                        text: "Marketing wants A/B test results (which show 23% lower conversion), Design insists the new checkout flow improves UX (but increases steps from 2 to 4), and Finance demands we ship because we spent $200K on the redesign. Launch is tomorrow."
+                    },
+                    {
+                        title: "The Data Dilemma",
+                        text: "Legal says our new AI recommendation engine violates GDPR if we use purchase history, but without it, accuracy drops from 89% to 34%. Compliance audit is next week, and this feature drives 60% of our Q4 revenue target."
+                    },
+                    {
+                        title: "Resource Roulette",
+                        text: "Your top engineer just quit mid-sprint, QA found 23 critical bugs, launch is scheduled for Monday, and the client threatens to sue if we delay. Meanwhile, customer support is drowning with 400% higher ticket volume from the beta."
+                    },
+                    {
+                        title: "The Metrics Mismatch",
+                        text: "User engagement is up 45%, but revenue is down 12%. Growth team wants to double down on viral features, Finance wants to focus on monetization, and users are loving the free tier too much. Board meeting is in 3 days."
+                    }
+                ];
+                
+                this.scenario = scenarios[Math.floor(Math.random() * scenarios.length)];
+            }
+
+            showGameState() {
+                document.getElementById('loading-state').classList.remove('active');
+                document.getElementById('game-state').classList.add('active');
+                
+                // Populate scenario
+                document.getElementById('scenario-text').textContent = this.scenario.text;
+                
+                this.startTimer();
+            }
+
+            startTimer() {
+                this.gameStarted = true;
+                this.timerInterval = setInterval(() => {
+                    this.timeLeft--;
+                    const timerCircle = document.getElementById('timer-circle');
+                    timerCircle.textContent = this.timeLeft;
+                    
+                    if (this.timeLeft <= 10) {
+                        timerCircle.classList.add('warning');
+                    }
+                    
+                    if (this.timeLeft <= 0) {
+                        this.timeUp();
+                    }
+                }, 1000);
+            }
+
+            timeUp() {
+                clearInterval(this.timerInterval);
+                this.userResponse = document.getElementById('response-input').value;
+                this.showResults();
+            }
+
+            async submitResponse() {
+                if (!this.gameStarted) return;
+                
+                clearInterval(this.timerInterval);
+                this.userResponse = document.getElementById('response-input').value;
+                
+                if (!this.userResponse.trim()) {
+                    alert('Please provide a response before submitting!');
+                    this.startTimer();
+                    return;
+                }
+                
+                await this.analyzeResponse();
+                this.showResults();
+            }
+
+            async analyzeResponse() {
+                // In production, this would call your AI API for analysis
+                // For now, we'll simulate realistic PM feedback
+                
+                const responses = this.userResponse.toLowerCase();
+                let score = 7; // Base score
+                let feedback = "Strong PM instincts! ";
+                
+                // Check for metrics
+                if (responses.includes('%') || responses.includes('metric') || responses.includes('kpi') || responses.includes('data')) {
+                    score += 1;
+                    feedback += "Great use of data-driven reasoning. ";
+                }
+                
+                // Check for alternatives
+                if (responses.includes('alternative') || responses.includes('option') || responses.includes('instead') || responses.includes('pivot')) {
+                    score += 1;
+                    feedback += "Excellent strategic thinking with alternatives. ";
+                }
+                
+                // Check for empathy
+                if (responses.includes('understand') || responses.includes('team') || responses.includes('concern')) {
+                    score += 0.5;
+                    feedback += "Good stakeholder empathy. ";
+                }
+                
+                // Length check
+                const wordCount = this.userResponse.split(' ').length;
+                if (wordCount >= 10 && wordCount <= 50) {
+                    score += 0.5;
+                    feedback += "Perfect brevity. ";
+                } else if (wordCount > 50) {
+                    feedback += "Consider being more concise - PMs must communicate efficiently. ";
+                }
+                
+                feedback += "You're in the top 10% of PMs, but the real challenges haven't even started. Can you maintain this excellence when the stakes are higher?";
+                
+                this.feedback = feedback;
+            }
+
+            showResults() {
+                document.getElementById('game-state').classList.remove('active');
+                document.getElementById('results-state').classList.add('active');
+                
+                // Show feedback
+                document.getElementById('ai-feedback').textContent = this.feedback;
+                
+                // Setup social sharing
+                this.setupSocialSharing();
+            }
+
+            setupSocialSharing() {
+                const timeSpent = 45 - this.timeLeft;
+                const shareText = `Just crushed a Stakeholder Sandwich in ${timeSpent}s! 🔥 Think you can handle impossible PM scenarios better? Try the MVPM challenge`;
+                const url = window.location.href;
+                
+                document.getElementById('linkedin-share').href = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}&text=${encodeURIComponent(shareText)}`;
+                document.getElementById('twitter-share').href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(url)}`;
+                document.getElementById('reddit-share').href = `https://reddit.com/submit?url=${encodeURIComponent(url)}&title=${encodeURIComponent(shareText)}`;
+            }
+
+            setupEventListeners() {
+                document.getElementById('submit-btn').addEventListener('click', () => this.submitResponse());
+                document.getElementById('skip-btn').addEventListener('click', () => this.skipChallenge());
+                
+                // Character count
+                const responseInput = document.getElementById('response-input');
+                const characterCount = document.getElementById('character-count');
+                
+                responseInput.addEventListener('input', (e) => {
+                    const count = e.target.value.length;
+                    characterCount.textContent = `${count}/500 characters`;
+                    
+                    if (count > 400) {
+                        characterCount.classList.add('warning');
+                    } else {
+                        characterCount.classList.remove('warning');
+                    }
+                });
+                
+                // Feedback submission
+                document.getElementById('feedback-submit').addEventListener('click', () => {
+                    const feedback = document.getElementById('user-feedback').value;
+                    if (feedback.trim()) {
+                        alert('🙏 Thanks for helping us improve! Your feedback shapes our AI.');
+                        document.getElementById('user-feedback').value = '';
+                    }
+                });
+                
+                // Enter key to submit
+                responseInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && e.ctrlKey) {
+                        this.submitResponse();
+                    }
+                });
+            }
+
+            skipChallenge() {
+                clearInterval(this.timerInterval);
+                this.userResponse = "Skipped";
+                this.feedback = "No worries! Even the best PMs know when to step back and reassess. But remember - the AI revolution won't wait. Ready to try again with a different scenario?";
+                this.showResults();
+            }
+        }
+
+        // Initialize game when page loads
+        let game;
+        document.addEventListener('DOMContentLoaded', () => {
+            game = new StakeholderSandwichGame();
+        });
+
+        function restartGame() {
+            // Reset all states
+            document.getElementById('results-state').classList.remove('active');
+            document.getElementById('loading-state').classList.add('active');
+            document.getElementById('response-input').value = '';
+            document.getElementById('character-count').textContent = '0/500 characters';
+            document.getElementById('character-count').classList.remove('warning');
+            document.getElementById('timer-circle').classList.remove('warning');
+            
+            // Start new game
+            game = new StakeholderSandwichGame();
+        }
+
+        // Prevent page refresh on accidental actions
+        window.addEventListener('beforeunload', (e) => {
+            if (game && game.gameStarted && game.timeLeft > 0) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+    </script>
+</body>
+</html>
