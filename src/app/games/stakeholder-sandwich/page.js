@@ -43,14 +43,7 @@ export default function StakeholderSandwichPage() {
 
   const scenarios = useMemo(() => SCENARIOS, []);
 
-  useEffect(() => {
-    initializeGame();
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-    };
-  }, [initializeGame]);
+  
 
   const initializeGame = useCallback(async () => {
     // Track game start
@@ -66,6 +59,15 @@ export default function StakeholderSandwichPage() {
     setGameState('playing');
     startTimer();
   }, [scenarios, startTimer, trackEvent]);
+
+  useEffect(() => {
+    initializeGame();
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [initializeGame]);
 
   const analyzeResponse = useCallback(() => {
     const responses = userResponse.toLowerCase();
