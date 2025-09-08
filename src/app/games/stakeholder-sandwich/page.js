@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { trackGameInteraction } from '@/lib/supabase';
 import Link from 'next/link';
@@ -17,7 +17,7 @@ export default function StakeholderSandwichPage() {
   const timerRef = useRef(null);
   const { trackEvent } = useAnalytics();
 
-  const scenarios = [
+  const scenarios = useMemo(() => [
     {
       title: "The Impossible Trinity",
       text: "Sales needs the enterprise feature shipped yesterday, Engineering says it needs 6 more weeks for security review, and your CEO just promised it to our biggest prospect in the board meeting. The prospect represents 40% revenue growth but won't wait past Friday. Your move."
@@ -38,7 +38,7 @@ export default function StakeholderSandwichPage() {
       title: "The Metrics Mismatch",
       text: "User engagement is up 45%, but revenue is down 12%. Growth team wants to double down on viral features, Finance wants to focus on monetization, and users are loving the free tier too much. Board meeting is in 3 days."
     }
-  ];
+  ], []);
 
   useEffect(() => {
     initializeGame();
@@ -62,7 +62,7 @@ export default function StakeholderSandwichPage() {
     setScenario(randomScenario);
     setGameState('playing');
     startTimer();
-  }, [startTimer, trackEvent, trackGameInteraction]);
+  }, [scenarios, startTimer, trackEvent]);
 
   const analyzeResponse = useCallback(() => {
     const responses = userResponse.toLowerCase();
@@ -108,7 +108,7 @@ export default function StakeholderSandwichPage() {
       response_length: userResponse.length,
       score: score
     });
-  }, [userResponse, timeLeft, trackEvent, trackGameInteraction]);
+  }, [userResponse, timeLeft, trackEvent]);
 
   const timeUp = useCallback(() => {
     if (timerRef.current) {
