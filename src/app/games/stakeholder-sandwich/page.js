@@ -6,6 +6,30 @@ import { trackGameInteraction } from '@/lib/supabase';
 import Link from 'next/link';
 import './stakeholder-sandwich.css';
 
+// Move scenarios outside the component
+const SCENARIOS = [
+  {
+    title: "The Impossible Trinity",
+    text: "Sales needs the enterprise feature shipped yesterday, Engineering says it needs 6 more weeks for security review, and your CEO just promised it to our biggest prospect in the board meeting. The prospect represents 40% revenue growth but won't wait past Friday. Your move."
+  },
+  {
+    title: "Feature Frankenstein",
+    text: "Marketing wants A/B test results (which show 23% lower conversion), Design insists the new checkout flow improves UX (but increases steps from 2 to 4), and Finance demands we ship because we spent $200K on the redesign. Launch is tomorrow."
+  },
+  {
+    title: "The Data Dilemma",
+    text: "Legal says our new AI recommendation engine violates GDPR if we use purchase history, but without it, accuracy drops from 89% to 34%. Compliance audit is next week, and this feature drives 60% of our Q4 revenue target."
+  },
+  {
+    title: "Resource Roulette",
+    text: "Your top engineer just quit mid-sprint, QA found 23 critical bugs, launch is scheduled for Monday, and the client threatens to sue if we delay. Meanwhile, customer support is drowning with 400% higher ticket volume from the beta."
+  },
+  {
+    title: "The Metrics Mismatch",
+    text: "User engagement is up 45%, but revenue is down 12%. Growth team wants to double down on viral features, Finance wants to focus on monetization, and users are loving the free tier too much. Board meeting is in 3 days."
+  }
+];
+
 export default function StakeholderSandwichPage() {
   const [gameState, setGameState] = useState('loading'); // loading, playing, results
   const [timeLeft, setTimeLeft] = useState(45);
@@ -17,28 +41,7 @@ export default function StakeholderSandwichPage() {
   const timerRef = useRef(null);
   const { trackEvent } = useAnalytics();
 
-  const scenarios = useMemo(() => [
-    {
-      title: "The Impossible Trinity",
-      text: "Sales needs the enterprise feature shipped yesterday, Engineering says it needs 6 more weeks for security review, and your CEO just promised it to our biggest prospect in the board meeting. The prospect represents 40% revenue growth but won't wait past Friday. Your move."
-    },
-    {
-      title: "Feature Frankenstein",
-      text: "Marketing wants A/B test results (which show 23% lower conversion), Design insists the new checkout flow improves UX (but increases steps from 2 to 4), and Finance demands we ship because we spent $200K on the redesign. Launch is tomorrow."
-    },
-    {
-      title: "The Data Dilemma",
-      text: "Legal says our new AI recommendation engine violates GDPR if we use purchase history, but without it, accuracy drops from 89% to 34%. Compliance audit is next week, and this feature drives 60% of our Q4 revenue target."
-    },
-    {
-      title: "Resource Roulette",
-      text: "Your top engineer just quit mid-sprint, QA found 23 critical bugs, launch is scheduled for Monday, and the client threatens to sue if we delay. Meanwhile, customer support is drowning with 400% higher ticket volume from the beta."
-    },
-    {
-      title: "The Metrics Mismatch",
-      text: "User engagement is up 45%, but revenue is down 12%. Growth team wants to double down on viral features, Finance wants to focus on monetization, and users are loving the free tier too much. Board meeting is in 3 days."
-    }
-  ], []);
+  const scenarios = useMemo(() => SCENARIOS, []);
 
   useEffect(() => {
     initializeGame();
