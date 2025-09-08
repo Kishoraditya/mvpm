@@ -44,54 +44,6 @@ export default function StakeholderSandwichPage() {
 
   const scenarios = useMemo(() => SCENARIOS, []);
 
-  const timeUp = useCallback(() => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-    }
-    analyzeResponse();
-    setGameState('results');
-  }, [analyzeResponse]);
-
-  useEffect(() => {
-    timeUpRef.current = timeUp;
-  }, [timeUp]);
-
-  const startTimer = useCallback(() => {
-    timerRef.current = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          timeUpRef.current?.();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  }, []);
-
-  const initializeGame = useCallback(async () => {
-    // Track game start
-    trackEvent('game_started', { game_name: 'stakeholder_sandwich' });
-    trackGameInteraction('stakeholder_sandwich', 'game_started');
-
-    // Simulate loading
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Select random scenario
-    const randomScenario = scenarios[Math.floor(Math.random() * scenarios.length)];
-    setScenario(randomScenario);
-    setGameState('playing');
-    startTimer();
-  }, [scenarios, startTimer, trackEvent, trackGameInteraction]);
-
-  useEffect(() => {
-    initializeGame();
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-    };
-  }, [initializeGame]);
-
   const analyzeResponse = useCallback(() => {
     const responses = userResponse.toLowerCase();
     let score = 7;
@@ -137,6 +89,54 @@ export default function StakeholderSandwichPage() {
       score: score
     });
   }, [userResponse, timeLeft, trackEvent]);
+
+  const timeUp = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+    analyzeResponse();
+    setGameState('results');
+  }, [analyzeResponse]);
+
+  useEffect(() => {
+    timeUpRef.current = timeUp;
+  }, [timeUp]);
+
+  const startTimer = useCallback(() => {
+    timerRef.current = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          timeUpRef.current?.();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
+
+  const initializeGame = useCallback(async () => {
+    // Track game start
+    trackEvent('game_started', { game_name: 'stakeholder_sandwich' });
+    trackGameInteraction('stakeholder_sandwich', 'game_started');
+
+    // Simulate loading
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Select random scenario
+    const randomScenario = scenarios[Math.floor(Math.random() * scenarios.length)];
+    setScenario(randomScenario);
+    setGameState('playing');
+    startTimer();
+  }, [scenarios, startTimer, trackEvent]);
+
+  useEffect(() => {
+    initializeGame();
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [initializeGame]);
 
   const submitResponse = () => {
     if (!userResponse.trim()) {
