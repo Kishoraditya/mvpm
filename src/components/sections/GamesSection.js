@@ -54,5 +54,5 @@ export default function GamesSection() {
         <p>Share your MVPM score and see if your leadership has what it takes. Most don't.</p>
       </div>
     </section>
-  );
-};
+  )
+}

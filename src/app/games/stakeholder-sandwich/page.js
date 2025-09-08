@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { trackGameInteraction } from '@/lib/supabase';
 import Link from 'next/link';
@@ -47,9 +47,9 @@ export default function StakeholderSandwichPage() {
         clearInterval(timerRef.current);
       }
     };
-  }, []);
+  }, [initializeGame]);
 
-  const initializeGame = async () => {
+  const initializeGame = useCallback(async () => {
     // Track game start
     trackEvent('game_started', { game_name: 'stakeholder_sandwich' });
     trackGameInteraction('stakeholder_sandwich', 'game_started');
@@ -62,43 +62,9 @@ export default function StakeholderSandwichPage() {
     setScenario(randomScenario);
     setGameState('playing');
     startTimer();
-  };
+  }, [startTimer, trackEvent, trackGameInteraction]);
 
-  const startTimer = () => {
-    timerRef.current = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          timeUp();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  };
-
-  const timeUp = () => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-    }
-    analyzeResponse();
-    setGameState('results');
-  };
-
-  const submitResponse = () => {
-    if (!userResponse.trim()) {
-      alert('Please provide a response before submitting!');
-      return;
-    }
-    
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-    }
-    
-    analyzeResponse();
-    setGameState('results');
-  };
-
-  const analyzeResponse = () => {
+  const analyzeResponse = useCallback(() => {
     const responses = userResponse.toLowerCase();
     let score = 7;
     let feedbackText = "Strong PM instincts! ";
@@ -146,6 +112,40 @@ export default function StakeholderSandwichPage() {
       response_length: userResponse.length,
       score: score
     });
+  }, [userResponse, timeLeft, trackEvent, trackGameInteraction]);
+
+  const timeUp = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+    analyzeResponse();
+    setGameState('results');
+  }, [analyzeResponse]);
+
+  const startTimer = useCallback(() => {
+    timerRef.current = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          timeUp();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, [timeUp]);
+
+  const submitResponse = () => {
+    if (!userResponse.trim()) {
+      alert('Please provide a response before submitting!');
+      return;
+    }
+    
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+    
+    analyzeResponse();
+    setGameState('results');
   };
 
   const skipChallenge = () => {
@@ -185,14 +185,14 @@ export default function StakeholderSandwichPage() {
       trackGameInteraction('stakeholder_sandwich', 'feedback_submitted', {
         feedback: userFeedback
       });
-      alert('🙏 Thanks for helping us improve! Your feedback shapes our AI.');
+      alert('Thanks for helping us improve! Your feedback shapes our AI.');
       setUserFeedback('');
     }
   };
 
   const setupSocialSharing = () => {
     const timeSpent = 45 - timeLeft;
-    const shareText = `Just crushed a Stakeholder Sandwich in ${timeSpent}s! 🔥 Think you can handle impossible PM scenarios better? Try the MVPM challenge`;
+    const shareText = `Just crushed a Stakeholder Sandwich in ${timeSpent}s! Think you can handle impossible PM scenarios better? Try the MVPM challenge`;
     const url = typeof window !== 'undefined' ? window.location.href : '';
     
     return {
