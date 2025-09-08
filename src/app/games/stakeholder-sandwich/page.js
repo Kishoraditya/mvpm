@@ -43,6 +43,17 @@ export default function StakeholderSandwichPage() {
 
   const scenarios = useMemo(() => SCENARIOS, []);
 
+  const startTimer = useCallback(() => {
+    timerRef.current = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          timeUp();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, [timeUp]);
   
 
   const initializeGame = useCallback(async () => {
@@ -123,17 +134,7 @@ export default function StakeholderSandwichPage() {
     setGameState('results');
   }, [analyzeResponse]);
 
-  const startTimer = useCallback(() => {
-    timerRef.current = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          timeUp();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  }, [timeUp]);
+  
 
   const submitResponse = () => {
     if (!userResponse.trim()) {
