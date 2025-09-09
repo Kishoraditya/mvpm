@@ -185,6 +185,46 @@ export default function ChartIn10Page() {
     };
   }, [gameState, timeLeft, selectedAnswer, currentScenario, trackEvent]);
 
+  const handleAnswerSubmit = useCallback(() => {
+    if (!selectedAnswer || !currentScenario) return;
+
+    clearInterval(timerRef.current);
+    
+    const selectedOption = currentScenario.options.find(opt => opt.id === selectedAnswer);
+    const earnedScore = selectedOption?.points || 0;
+    const timeBonus = timeLeft > 5 ? 1 : 0; // Bonus point for quick decisions
+    const totalScore = earnedScore + timeBonus;
+
+    setScore(prev => prev + totalScore);
+    setGameState('results');
+
+    // Track completion
+    trackEvent('chart_game_completed', {
+      scenario_id: currentScenario.id,
+      selected_answer: selectedAnswer,
+      correct_answer: currentScenario.options.find(opt => opt.points === 2)?.id,
+      score: totalScore,
+      time_remaining: timeLeft,
+      game_duration: 10 - timeLeft
+    });
+
+    // Track to Supabase
+    if (typeof window !== 'undefined' && window.supabase) {
+      window.supabase.from('game_interactions').insert({
+        game_type: 'chart_in_10',
+        interaction_type: 'game_completed',
+        interaction_data: {
+          scenario_id: currentScenario.id,
+          selected_answer: selectedAnswer,
+          score: totalScore,
+          time_remaining: timeLeft
+        }
+      }).then(({ error }) => {
+        if (error) console.error('Supabase tracking error:', error);
+      });
+    }
+  }, [selectedAnswer, currentScenario, timeLeft, trackEvent]);
+
   // Handle submission when state changes to submitting
   useEffect(() => {
     if (gameState === 'submitting' && selectedAnswer && currentScenario) {
@@ -196,45 +236,6 @@ export default function ChartIn10Page() {
     if (gameState !== 'playing' || timeLeft === 0) return;
     setSelectedAnswer(answerId);
   }, [gameState, timeLeft]);
-
-  const handleAnswerSubmit = useCallback(() => {
-    if (!selectedAnswer || !currentScenario) return;
-
-    clearInterval(timerRef.current);
-    
-    const selectedOption = currentScenario.options.find(opt => opt.id === selectedAnswer);
-    const earnedScore = selectedOption?.points || 0;
-    const timeBonus = timeLeft > 5 ? 1 : 0; // Bonus point for quick decisions
-    const totalScore = earnedScore + timeBonus;
-
-    setScore(totalScore);
-    setGameResults({
-      score: totalScore,
-      scenario: currentScenario,
-      selectedAnswer: selectedAnswer,
-      selectedOption: selectedOption,
-      timeBonus: timeBonus,
-      timeUsed: 10 - timeLeft
-    });
-    
-    setGameState('results');
-    setShowExplanation(true);
-
-    trackEvent('game_completed', { 
-      game: 'chart-in-10', 
-      scenario: currentScenario.id,
-      score: totalScore,
-      answer: selectedAnswer,
-      time_used: 10 - timeLeft
-    });
-    
-    trackGameInteraction('chart-in-10', 'game_completed', {
-      scenario_id: currentScenario.id,
-      score: totalScore,
-      answer: selectedAnswer,
-      time_used: 10 - timeLeft
-    });
-  }, [selectedAnswer, currentScenario, timeLeft, trackEvent]);
 
   const resetGame = useCallback(() => {
     setGameState('ready');

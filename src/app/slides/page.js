@@ -55,7 +55,7 @@ export default function SlidesPage() {
             Most Valuable Product Manager isn't just a title—it's earned through split-second decisions, razor-sharp thinking, and the ability to thrive under pressure.
           </p>
           <p style={{ fontSize: '1rem', color: '#667eea', marginTop: '2rem' }}>
-            🏆 HackAI 2025 • Team iterate • Built in 48 hours
+            🏆 MosAIc by TPF • Team iterate • Built in 48 hours
           </p>
         </div>
       </div>
