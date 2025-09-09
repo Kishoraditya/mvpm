@@ -78,52 +78,6 @@ export default function AssumptionSniperPage() {
 
     const scenarios = useMemo(() => SCENARIOS, []);
 
-    const timeUp = useCallback(() => {
-        if (timerRef.current) {
-            clearInterval(timerRef.current);
-        }
-        // Automatically submit with current assumptions when time is up
-        submitAssumptions(true);
-    }, [submitAssumptions]);
-
-    const startTimer = useCallback(() => {
-        setTimeLeft(40);
-        timerRef.current = setInterval(() => {
-            setTimeLeft(prev => {
-                if (prev <= 1) {
-                    clearInterval(timerRef.current);
-                    timeUp();
-                    return 0;
-                }
-                return prev - 1;
-            });
-        }, 1000);
-    }, [timeUp]);
-
-    const initializeGame = useCallback(() => {
-        trackEvent('game_started', { game_name: 'assumption_sniper' });
-        trackGameInteraction('assumption_sniper', 'game_started');
-        const randomScenario = scenarios[Math.floor(Math.random() * scenarios.length)];
-        setScenario(randomScenario);
-        setGameState('playing');
-        startTimer();
-    }, [scenarios, startTimer, trackEvent]);
-
-    useEffect(() => {
-        initializeGame();
-        return () => {
-            if (timerRef.current) {
-                clearInterval(timerRef.current);
-            }
-        };
-    }, [initializeGame]);
-
-    const handleAssumptionChange = (index, value) => {
-        const newAssumptions = [...assumptions];
-        newAssumptions[index] = value;
-        setAssumptions(newAssumptions);
-    };
-
     const submitAssumptions = useCallback(async (isTimeUp = false) => {
         if (!isTimeUp && assumptions.some(a => a.trim().length < 10)) {
             alert('Each assumption needs to be more detailed (at least 10 characters).');
@@ -205,6 +159,53 @@ export default function AssumptionSniperPage() {
             assumptions: assumptions,
         });
     }, [assumptions, finalScore, timeLeft, trackEvent]);
+
+    const initializeGame = useCallback(() => {
+        trackEvent('game_started', { game_name: 'assumption_sniper' });
+        trackGameInteraction('assumption_sniper', 'game_started');
+        const randomScenario = scenarios[Math.floor(Math.random() * scenarios.length)];
+        setScenario(randomScenario);
+        setGameState('playing');
+        setTimeLeft(40);
+    }, [scenarios, trackEvent]);
+
+    // Handle timer separately to avoid circular dependency
+    useEffect(() => {
+        if (gameState === 'playing' && timeLeft > 0) {
+            timerRef.current = setInterval(() => {
+                setTimeLeft(prev => {
+                    if (prev <= 1) {
+                        clearInterval(timerRef.current);
+                        // Auto-submit when time is up
+                        submitAssumptions(true);
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+        }
+
+        return () => {
+            if (timerRef.current) {
+                clearInterval(timerRef.current);
+            }
+        };
+    }, [gameState, timeLeft, submitAssumptions]);
+
+    useEffect(() => {
+        initializeGame();
+        return () => {
+            if (timerRef.current) {
+                clearInterval(timerRef.current);
+            }
+        };
+    }, [initializeGame]);
+
+    const handleAssumptionChange = (index, value) => {
+        const newAssumptions = [...assumptions];
+        newAssumptions[index] = value;
+        setAssumptions(newAssumptions);
+    };
 
     const restartGame = () => {
         setGameState('playing');
