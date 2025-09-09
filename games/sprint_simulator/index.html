@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprint Simulator</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #game-container {
+            width: 90%;
+            max-width: 800px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 90vh;
+            max-height: 700px;
+        }
+
+        .screen {
+            padding: 30px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        h1, h2, h3 {
+            color: #1a202c;
+            margin-top: 0;
+        }
+
+        /* --- Planning Screen --- */
+        #planning-screen h2 {
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        #stories-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        #stories-list li {
+            background-color: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        #stories-list li:hover {
+            background-color: #edf2f7;
+        }
+
+        #stories-list li.selected {
+            background-color: #e6fffa;
+            border-color: #38b2ac;
+        }
+
+        #stories-list input[type="checkbox"] {
+            margin-right: 15px;
+            width: 20px;
+            height: 20px;
+        }
+
+        .story-details {
+            flex-grow: 1;
+        }
+
+        .story-details strong {
+            font-size: 1.1em;
+        }
+
+        .story-points {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #2c5282;
+            margin-left: 15px;
+        }
+
+        #planning-footer {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #planning-footer span {
+            font-size: 1.2em;
+            font-weight: 500;
+        }
+
+        #start-sprint-btn {
+            background-color: #48bb78;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        #start-sprint-btn:disabled {
+            background-color: #a0aec0;
+            cursor: not-allowed;
+        }
+
+        /* --- Sprint Screen --- */
+        #sprint-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        #sprint-header h2 {
+            margin: 0;
+        }
+
+        .metric-display {
+            font-size: 1.1em;
+        }
+
+        #event-card {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        #event-title {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+        }
+
+        #event-description {
+            font-size: 1.2em;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: #4a5568;
+        }
+
+        #event-options button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            background-color: #fff;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        #event-options button:hover {
+            background-color: #edf2f7;
+            transform: translateY(-2px);
+        }
+
+        /* --- Review Screen --- */
+        #review-screen {
+            text-align: center;
+        }
+
+        #review-summary {
+            margin: 20px 0;
+        }
+
+        #play-again-btn {
+             background-color: #4299e1;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 20px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <!-- Screen 1: Sprint Planning -->
+        <div id="planning-screen" class="screen">
+            <h2>Sprint Planning</h2>
+            <p>Your team's capacity is <strong>30 points</strong>. Select stories to commit to this sprint.</p>
+            <ul id="stories-list"></ul>
+            <div id="planning-footer">
+                <span id="points-display">Committed: 0 / 30 points</span>
+                <button id="start-sprint-btn" disabled>Start Sprint</button>
+            </div>
+        </div>
+
+        <!-- Screen 2: Daily Sprint -->
+        <div id="sprint-screen" class="screen hidden">
+            <div id="sprint-header">
+                <h2 id="day-counter">Day 1 of 10</h2>
+                <div class="metrics">
+                    <span class="metric-display">Morale: <span id="morale-display">100</span>%</span>
+                    <span class="metric-display">Stakeholders: <span id="stakeholder-display">100</span>%</span>
+                </div>
+            </div>
+            <div id="event-card">
+                <h3 id="event-title">Event Title</h3>
+                <p id="event-description">Event description goes here.</p>
+                <div id="event-options"></div>
+            </div>
+        </div>
+
+        <!-- Screen 3: Sprint Review -->
+        <div id="review-screen" class="screen hidden">
+            <h2>Sprint Review</h2>
+            <div id="review-summary">
+                <h3>Sprint Completed!</h3>
+                <p>Points Completed: <span id="final-points">0</span></p>
+                <p>Final Team Morale: <span id="final-morale">0</span>%</p>
+                <p>Final Stakeholder Happiness: <span id="final-stakeholders">0</span>%</p>
+                <p id="final-feedback">Feedback on your performance.</p>
+            </div>
+            <button id="play-again-btn">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM Elements ---
+            const screens = {
+                planning: document.getElementById('planning-screen'),
+                sprint: document.getElementById('sprint-screen'),
+                review: document.getElementById('review-screen'),
+            };
+            const storiesList = document.getElementById('stories-list');
+            const pointsDisplay = document.getElementById('points-display');
+            const startSprintBtn = document.getElementById('start-sprint-btn');
+
+            const dayCounter = document.getElementById('day-counter');
+            const moraleDisplay = document.getElementById('morale-display');
+            const stakeholderDisplay = document.getElementById('stakeholder-display');
+            const eventTitle = document.getElementById('event-title');
+            const eventDescription = document.getElementById('event-description');
+            const eventOptions = document.getElementById('event-options');
+
+            const finalPoints = document.getElementById('final-points');
+            const finalMorale = document.getElementById('final-morale');
+            const finalStakeholders = document.getElementById('final-stakeholders');
+            const finalFeedback = document.getElementById('final-feedback');
+            const playAgainBtn = document.getElementById('play-again-btn');
+
+            // --- Game Data ---
+            const TEAM_CAPACITY = 30;
+            const SPRINT_DAYS = 10;
+
+            const ALL_STORIES = [
+                { id: 1, title: 'User login with email/password', points: 5, risk: 0.1 },
+                { id: 2, title: 'Implement "Forgot Password" flow', points: 3, risk: 0.1 },
+                { id: 3, title: 'User profile page', points: 5, risk: 0.2 },
+                { id: 4, title: 'Integrate with new payment gateway', points: 8, risk: 0.4 },
+                { id: 5, title: 'Onboarding tutorial for new users', points: 5, risk: 0.2 },
+                { id: 6, title: 'Admin dashboard for user management', points: 8, risk: 0.3 },
+                { id: 7, title: 'Refactor legacy reporting module', points: 10, risk: 0.5 },
+                { id: 8, title: 'Add 2FA security', points: 5, risk: 0.3 },
+            ];
+
+            const DAILY_EVENTS = [
+                {
+                    title: "Urgent Stakeholder Request",
+                    description: "The CEO wants a 'small' change to the logo color, effective immediately. It's not in the sprint.",
+                    options: [
+                        { text: "Tell them it's out of scope.", morale: 5, stakeholders: -20, velocity: 0 },
+                        { text: "Drop a low-priority task to fit it in.", morale: -10, stakeholders: 15, velocity: -1 },
+                        { text: "Ask the team to work overtime.", morale: -20, stakeholders: 10, velocity: 0 },
+                    ]
+                },
+                {
+                    title: "A Key Developer is Sick",
+                    description: "Your lead backend engineer is out sick for the day. They were working on a critical path story.",
+                    options: [
+                        { text: "Let the team self-organize to cover.", morale: 5, stakeholders: 0, velocity: -2 },
+                        { text: "Re-assign their tasks immediately.", morale: -5, stakeholders: 0, velocity: -1 },
+                        { text: "Delay the dependent stories.", morale: 0, stakeholders: -5, velocity: -3 },
+                    ]
+                },
+                {
+                    title: "Unexpected Technical Debt",
+                    description: "The team discovered a part of the codebase is more fragile than expected, slowing down progress on a feature.",
+                    options: [
+                        { text: "Allocate time to fix it properly.", morale: 10, stakeholders: -5, velocity: -3 },
+                        { text: "Apply a quick patch to keep moving.", morale: -10, stakeholders: 5, velocity: -1 },
+                        { text: "Ignore it for now.", morale: -15, stakeholders: 0, velocity: 0 },
+                    ]
+                },
+                 {
+                    title: "Scope Creep from Marketing",
+                    description: "Marketing asks if you can 'just add' a tracking pixel for their new campaign to the feature you're building.",
+                    options: [
+                        { text: "Politely decline and stick to the plan.", morale: 5, stakeholders: -10, velocity: 0 },
+                        { text: "Accept, it's a small change.", morale: -5, stakeholders: 10, velocity: -1 },
+                        { text: "Tell them to file a ticket for the next sprint.", morale: 0, stakeholders: 0, velocity: 0 },
+                    ]
+                },
+            ];
+
+            // --- Game State ---
+            let state = {};
+
+            function initializeGame() {
+                state = {
+                    committedStories: [],
+                    committedPoints: 0,
+                    currentDay: 1,
+                    morale: 100,
+                    stakeholders: 100,
+                    completedPoints: 0,
+                    eventQueue: [...DAILY_EVENTS].sort(() => 0.5 - Math.random())
+                };
+                renderPlanningScreen();
+                showScreen('planning');
+            }
+
+            function showScreen(screenName) {
+                Object.values(screens).forEach(s => s.classList.add('hidden'));
+                screens[screenName].classList.remove('hidden');
+            }
+
+            // --- Planning Phase ---
+            function renderPlanningScreen() {
+                storiesList.innerHTML = '';
+                ALL_STORIES.forEach(story => {
+                    const li = document.createElement('li');
+                    li.dataset.storyId = story.id;
+                    li.innerHTML = `
+                        <input type="checkbox" class="story-checkbox" id="story-${story.id}">
+                        <div class="story-details">
+                            <strong>${story.title}</strong>
+                            <p>Risk: ${story.risk * 100}%</p>
+                        </div>
+                        <span class="story-points">${story.points} pts</span>
+                    `;
+                    li.addEventListener('click', (e) => {
+                        const checkbox = li.querySelector('.story-checkbox');
+                        if (e.target !== checkbox) {
+                            checkbox.checked = !checkbox.checked;
+                        }
+                        toggleStorySelection(story, checkbox.checked);
+                    });
+                    storiesList.appendChild(li);
+                });
+                updatePointsDisplay();
+            }
+
+            function toggleStorySelection(story, isSelected) {
+                const storyId = story.id;
+                const isAlreadySelected = state.committedStories.some(s => s.id === storyId);
+
+                if (isSelected && !isAlreadySelected) {
+                    if (state.committedPoints + story.points <= TEAM_CAPACITY) {
+                        state.committedStories.push(story);
+                        document.querySelector(`[data-story-id="${storyId}"]`).classList.add('selected');
+                    }
+                } else if (!isSelected && isAlreadySelected) {
+                    state.committedStories = state.committedStories.filter(s => s.id !== storyId);
+                     document.querySelector(`[data-story-id="${storyId}"]`).classList.remove('selected');
+                }
+                
+                // Resync checkbox state if selection was blocked
+                const checkbox = document.getElementById(`story-${story.id}`);
+                const stillSelected = state.committedStories.some(s => s.id === storyId);
+                checkbox.checked = stillSelected;
+                if(stillSelected) {
+                     document.querySelector(`[data-story-id="${storyId}"]`).classList.add('selected');
+                } else {
+                     document.querySelector(`[data-story-id="${storyId}"]`).classList.remove('selected');
+                }
+
+                updatePointsDisplay();
+            }
+
+            function updatePointsDisplay() {
+                state.committedPoints = state.committedStories.reduce((sum, story) => sum + story.points, 0);
+                pointsDisplay.textContent = `Committed: ${state.committedPoints} / ${TEAM_CAPACITY} points`;
+                startSprintBtn.disabled = state.committedStories.length === 0;
+            }
+
+            startSprintBtn.addEventListener('click', startSprint);
+
+            // --- Sprint Phase ---
+            function startSprint() {
+                state.baseVelocity = state.committedPoints / SPRINT_DAYS;
+                showScreen('sprint');
+                runDay();
+            }
+
+            function runDay() {
+                if (state.currentDay > SPRINT_DAYS) {
+                    endSprint();
+                    return;
+                }
+                updateUI();
+                presentEvent();
+            }
+
+            function updateUI() {
+                dayCounter.textContent = `Day ${state.currentDay} of ${SPRINT_DAYS}`;
+                moraleDisplay.textContent = `${Math.round(state.morale)}%`;
+                stakeholderDisplay.textContent = `${Math.round(state.stakeholders)}%`;
+            }
+
+            function presentEvent() {
+                const event = state.eventQueue.pop() || { title: 'A Quiet Day', description: 'The team is making steady progress.', options: [{ text: 'Keep it up!', morale: 2, stakeholders: 1, velocity: 0 }] };
+                eventTitle.textContent = event.title;
+                eventDescription.textContent = event.description;
+                eventOptions.innerHTML = '';
+                event.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.textContent = option.text;
+                    button.onclick = () => handleOptionChoice(option);
+                    eventOptions.appendChild(button);
+                });
+            }
+
+            function handleOptionChoice(option) {
+                state.morale = Math.max(0, Math.min(100, state.morale + option.morale));
+                state.stakeholders = Math.max(0, Math.min(100, state.stakeholders + option.stakeholders));
+                
+                const moraleModifier = state.morale / 100; // 1.0 at 100%, 0.5 at 50%
+                const dailyVelocity = state.baseVelocity * moraleModifier + option.velocity;
+                state.completedPoints += dailyVelocity;
+
+                // Check for random risk events
+                state.committedStories.forEach(story => {
+                    if (Math.random() < story.risk / SPRINT_DAYS) { // Spread risk over sprint
+                        state.completedPoints -= story.points * 0.2; // Risk materializes, lose some progress
+                        // Could add a mini-event here in a future version
+                    }
+                });
+
+                state.currentDay++;
+                runDay();
+            }
+
+            // --- Review Phase ---
+            function endSprint() {
+                finalPoints.textContent = Math.round(state.completedPoints);
+                finalMorale.textContent = Math.round(state.morale);
+                finalStakeholders.textContent = Math.round(state.stakeholders);
+
+                let feedback = '';
+                if (state.completedPoints >= state.committedPoints) {
+                    feedback = 'Excellent work! You delivered on your commitments and managed the sprint perfectly.';
+                } else if (state.completedPoints > state.committedPoints * 0.7) {
+                    feedback = 'Good effort. You delivered most of what you promised, despite some challenges.';
+                } else {
+                    feedback = 'A tough sprint. Significant challenges impacted delivery. Time for a retrospective!';
+                }
+                finalFeedback.textContent = feedback;
+
+                showScreen('review');
+            }
+
+            playAgainBtn.addEventListener('click', initializeGame);
+
+            // --- Initial Load ---
+            initializeGame();
+        });
+    </script>
+</body>
+</html>

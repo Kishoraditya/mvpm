@@ -4,6 +4,7 @@ import Footer from '@/components/layout/Footer'
 import HeroSection from '@/components/sections/HeroSection'
 import GamesSection from '@/components/sections/GamesSection'
 import HowItWorksSection from '@/components/sections/HowItWorksSection'
+import FAQSection from '@/components/sections/FAQSection'
 import ComingSoonSection from '@/components/sections/ComingSoonSection'
 import SignupSection from '@/components/sections/SignupSection'
 
@@ -16,6 +17,7 @@ export default function Home() {
         <HeroSection />
         <GamesSection />
         <HowItWorksSection />
+        <FAQSection />
         <ComingSoonSection />
         <SignupSection />
       </main>

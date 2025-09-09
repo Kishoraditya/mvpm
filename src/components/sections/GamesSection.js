@@ -12,22 +12,25 @@ export default function GamesSection() {
       href: '/games/stakeholder-sandwich'
     },
     {
-      id: 'chart_in_10',
-      title: 'Chart-in-10',
-      description: '10 seconds to read a chart. Keep or kill? Your call could make or break the quarter.',
-      timer: 'LIGHTNING 10s'
+      id: 'sprint_simulator',
+      title: 'Sprint Simulator',
+      description: 'Navigate 10 days of PM chaos. Balance stakeholders, team morale, and delivery commitments.',
+      timer: 'STRATEGIC 5min',
+      href: '/games/sprint-simulator'
     },
     {
       id: 'assumption_sniper',
       title: 'Assumption Sniper',
-      description: 'Find exactly 3 hidden assumptions that could tank this feature. Miss one, pay the price.',
-      timer: 'SURGICAL 40s'
+      description: 'Hunt down 3 deadly assumptions that could tank this feature launch. Your PM instincts on trial.',
+      timer: 'SURGICAL 40s',
+      href: '/games/assumption-sniper'
     },
     {
-      id: 'sprint_simulator',
-      title: 'Sprint Simulator',
-      description: '5-week product sprint compressed into split-second decisions. Ship or sink.',
-      timer: 'CHAOS 5min'
+      id: 'chart_in_10',
+      title: 'Chart-in-10',
+      description: '10 seconds to read a chart. Keep or kill? Your call could make or break the quarter.',
+      timer: 'LIGHTNING 10s',
+      href: '/games/chart-in-10'
     }
   ];
 
