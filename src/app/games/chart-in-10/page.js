@@ -148,35 +148,49 @@ export default function ChartIn10Page() {
     
     trackEvent('game_started', { game: 'chart-in-10', scenario: randomScenario.id });
     trackGameInteraction('chart-in-10', 'game_started', { scenario_id: randomScenario.id });
+  }, [trackEvent]);
 
-    // Start countdown
-    timerRef.current = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          clearInterval(timerRef.current);
-          handleTimeUp();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  }, [trackEvent, handleTimeUp]);
-
-  const handleTimeUp = useCallback(() => {
-    if (selectedAnswer) {
-      handleAnswerSubmit();
-    } else {
-      // Time's up with no answer
-      setGameResults({
-        score: 0,
-        scenario: currentScenario,
-        selectedAnswer: null,
-        timeUp: true
-      });
-      setGameState('results');
-      trackEvent('game_timeout', { game: 'chart-in-10', scenario: currentScenario?.id });
+  // Handle timer separately to avoid circular dependency
+  useEffect(() => {
+    if (gameState === 'playing' && timeLeft > 0) {
+      timerRef.current = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            clearInterval(timerRef.current);
+            // Handle time up directly here to avoid circular dependency
+            if (selectedAnswer) {
+              // Will trigger handleAnswerSubmit via useEffect
+              setGameState('submitting');
+            } else {
+              setGameResults({
+                score: 0,
+                scenario: currentScenario,
+                selectedAnswer: null,
+                timeUp: true
+              });
+              setGameState('results');
+              trackEvent('game_timeout', { game: 'chart-in-10', scenario: currentScenario?.id });
+            }
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
     }
-  }, [selectedAnswer, currentScenario, trackEvent, handleAnswerSubmit]);
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [gameState, timeLeft, selectedAnswer, currentScenario, trackEvent]);
+
+  // Handle submission when state changes to submitting
+  useEffect(() => {
+    if (gameState === 'submitting' && selectedAnswer && currentScenario) {
+      handleAnswerSubmit();
+    }
+  }, [gameState, selectedAnswer, currentScenario, handleAnswerSubmit]);
 
   const handleAnswerSelect = useCallback((answerId) => {
     if (gameState !== 'playing' || timeLeft === 0) return;
