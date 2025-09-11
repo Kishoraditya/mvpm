@@ -5,6 +5,7 @@ import { useAnalytics } from '@/hooks/useAnalytics';
 import { trackGameInteraction } from '@/lib/supabase';
 import Link from 'next/link';
 import './assumption-sniper.css';
+import appConfig from '@/lib/config';
 
 const SCENARIOS = [
     {
@@ -64,7 +65,7 @@ const analyzeAssumptionsLocally = (assumptions) => {
     });
 };
 
-export default function AssumptionSniperPage() {
+function AssumptionSniperGame() {
     const [gameState, setGameState] = useState('playing'); // playing, loading, results
     const [timeLeft, setTimeLeft] = useState(40);
     const [scenario, setScenario] = useState(null);
@@ -333,20 +334,22 @@ export default function AssumptionSniperPage() {
                                 </div>
                             )}
 
-                            <div className="social-share">
-                                <h3 className="social-title">🚀 Share Your Assumption Hunt</h3>
-                                <div className="social-buttons">
-                                    <a href={socialLinks.linkedin} className="social-btn linkedin" target="_blank" rel="noopener noreferrer">
-                                        <span>📊</span> LinkedIn
-                                    </a>
-                                    <a href={socialLinks.twitter} className="social-btn twitter" target="_blank" rel="noopener noreferrer">
-                                        <span>🐦</span> Twitter
-                                    </a>
-                                    <a href={socialLinks.reddit} className="social-btn reddit" target="_blank" rel="noopener noreferrer">
-                                        <span>🤖</span> Reddit
-                                    </a>
+                            {appConfig.getFeatureFlag('ui.socialShare', true) && (
+                                <div className="social-share">
+                                    <h3 className="social-title">🚀 Share Your Assumption Hunt</h3>
+                                    <div className="social-buttons">
+                                        <a href={socialLinks.linkedin} className="social-btn linkedin" target="_blank" rel="noopener noreferrer">
+                                            <span>📊</span> LinkedIn
+                                        </a>
+                                        <a href={socialLinks.twitter} className="social-btn twitter" target="_blank" rel="noopener noreferrer">
+                                            <span>🐦</span> Twitter
+                                        </a>
+                                        <a href={socialLinks.reddit} className="social-btn reddit" target="_blank" rel="noopener noreferrer">
+                                            <span>🤖</span> Reddit
+                                        </a>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
                         
                         <div className="action-section" style={{display: 'block'}}>
@@ -384,4 +387,25 @@ export default function AssumptionSniperPage() {
             </div>
         </>
     );
+}
+
+export default function AssumptionSniperPage() {
+    // Gate by feature flag
+    if (!appConfig.getFeatureFlag('games.assumption_sniper', true)) {
+        return (
+            <div className="game-container" style={{ padding: '2rem' }}>
+                <header className="game-header-nav">
+                    <nav>
+                        <Link href="/" className="logo">iterate</Link>
+                        <Link href="/" className="back-home">← Back to Home</Link>
+                    </nav>
+                </header>
+                <h1>Assumption Sniper</h1>
+                <p>This game is currently unavailable.</p>
+                <p><Link href="/">Return to games</Link></p>
+            </div>
+        );
+    }
+
+    return <AssumptionSniperGame />;
 }

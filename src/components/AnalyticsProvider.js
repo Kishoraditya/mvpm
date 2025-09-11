@@ -3,8 +3,20 @@
 import { useEffect } from 'react';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { useScrollEffects } from '@/hooks/useScrollEffects';
+import appConfig from '@/lib/config';
 
 const AnalyticsProvider = ({ children }) => {
+  // Ensure self opt-out is applied as early as possible
+  if (typeof window !== 'undefined') {
+    try {
+      if (appConfig.get('features.selfOptOut')) {
+        localStorage.setItem('disable_posthog', 'true');
+      }
+    } catch {
+      // no-op
+    }
+  }
+
   const { trackScrollDepth } = useAnalytics();
   useScrollEffects();
 

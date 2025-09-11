@@ -4,7 +4,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { trackGameInteraction } from '@/lib/supabase';
 import Link from 'next/link';
-import './chart-in-10.css';
+import './chart-in-20.css';
+import appConfig from '@/lib/config';
 
 // Chart scenarios with different business contexts
 const CHART_SCENARIOS = [
@@ -114,14 +115,15 @@ const CHART_SCENARIOS = [
   }
 ];
 
-export default function ChartIn10Page() {
+function ChartIn20Game() {
   const [gameState, setGameState] = useState('loading'); // loading, ready, playing, results
   const [currentScenario, setCurrentScenario] = useState(null);
-  const [timeLeft, setTimeLeft] = useState(10);
+  const [timeLeft, setTimeLeft] = useState(20);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [score, setScore] = useState(0);
   const [gameResults, setGameResults] = useState(null);
   const [showExplanation, setShowExplanation] = useState(false);
+  const [userFeedback, setUserFeedback] = useState('');
   
   const timerRef = useRef(null);
   const { trackEvent } = useAnalytics();
@@ -132,8 +134,8 @@ export default function ChartIn10Page() {
       setGameState('ready');
     }, 1500);
 
-    trackEvent('game_loaded', { game: 'chart-in-10' });
-    trackGameInteraction('chart-in-10', 'game_loaded');
+    trackEvent('game_loaded', { game: 'chart-in-20' });
+    trackGameInteraction('chart-in-20', 'game_loaded');
 
     return () => clearTimeout(timer);
   }, [trackEvent]);
@@ -142,12 +144,12 @@ export default function ChartIn10Page() {
     const randomScenario = CHART_SCENARIOS[Math.floor(Math.random() * CHART_SCENARIOS.length)];
     setCurrentScenario(randomScenario);
     setGameState('playing');
-    setTimeLeft(10);
+    setTimeLeft(20);
     setSelectedAnswer(null);
     setShowExplanation(false);
     
-    trackEvent('game_started', { game: 'chart-in-10', scenario: randomScenario.id });
-    trackGameInteraction('chart-in-10', 'game_started', { scenario_id: randomScenario.id });
+    trackEvent('game_started', { game: 'chart-in-20', scenario: randomScenario.id });
+    trackGameInteraction('chart-in-20', 'game_started', { scenario_id: randomScenario.id });
   }, [trackEvent]);
 
   // Handle timer separately to avoid circular dependency
@@ -169,7 +171,7 @@ export default function ChartIn10Page() {
                 timeUp: true
               });
               setGameState('results');
-              trackEvent('game_timeout', { game: 'chart-in-10', scenario: currentScenario?.id });
+              trackEvent('game_timeout', { game: 'chart-in-20', scenario: currentScenario?.id });
             }
             return 0;
           }
@@ -196,6 +198,13 @@ export default function ChartIn10Page() {
     const totalScore = earnedScore + timeBonus;
 
     setScore(prev => prev + totalScore);
+    setGameResults({
+      scenario: currentScenario,
+      selectedOption,
+      timeBonus,
+      timeUsed: 20 - timeLeft,
+      timeUp: false
+    });
     setGameState('results');
 
     // Track completion
@@ -205,13 +214,13 @@ export default function ChartIn10Page() {
       correct_answer: currentScenario.options.find(opt => opt.points === 2)?.id,
       score: totalScore,
       time_remaining: timeLeft,
-      game_duration: 10 - timeLeft
+      game_duration: 20 - timeLeft
     });
 
     // Track to Supabase
     if (typeof window !== 'undefined' && window.supabase) {
       window.supabase.from('game_interactions').insert({
-        game_type: 'chart_in_10',
+        game_type: 'chart_in_20',
         interaction_type: 'game_completed',
         interaction_data: {
           scenario_id: currentScenario.id,
@@ -240,17 +249,18 @@ export default function ChartIn10Page() {
   const resetGame = useCallback(() => {
     setGameState('ready');
     setCurrentScenario(null);
-    setTimeLeft(10);
+    setTimeLeft(20);
     setSelectedAnswer(null);
     setScore(0);
     setGameResults(null);
     setShowExplanation(false);
+    setUserFeedback('');
     clearInterval(timerRef.current);
   }, []);
 
   const shareScore = useCallback((platform) => {
-    const shareText = `I just analyzed a business chart in ${10 - (gameResults?.timeUsed || 0)} seconds and scored ${score}/3 points on Chart-in-10! 📊 Think you can beat my PM instincts?`;
-    const shareUrl = 'https://mvpm.app/games/chart-in-10';
+    const shareText = `I just analyzed a business chart in ${20 - (gameResults?.timeUsed || 0)} seconds and scored ${score}/3 points on Chart-in-20! 📊 Think you can beat my PM instincts?`;
+    const shareUrl = 'https://mvpm.app/games/chart-in-20';
     
     const urls = {
       twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
@@ -259,8 +269,16 @@ export default function ChartIn10Page() {
     };
 
     window.open(urls[platform], '_blank');
-    trackEvent('score_shared', { game: 'chart-in-10', platform, score });
+    trackEvent('score_shared', { game: 'chart-in-20', platform, score });
   }, [score, gameResults, trackEvent]);
+
+  const submitUserFeedback = useCallback(() => {
+    if (!userFeedback.trim()) return;
+    trackEvent('user_feedback_submitted', { game_name: 'chart-in-20', feedback: userFeedback });
+    trackGameInteraction('chart-in-20', 'feedback_submitted', { feedback: userFeedback });
+    alert('Thanks for helping us improve! Your feedback shapes our AI.');
+    setUserFeedback('');
+  }, [trackEvent, userFeedback]);
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -442,11 +460,11 @@ export default function ChartIn10Page() {
   };
 
   return (
-    <div className="chart-in-10-game">
+    <div className="chart-in-20-game">
       <div className="game-header">
         <Link href="/" className="back-link">← Back to Games</Link>
-        <h1>Chart-in-10</h1>
-        <p className="game-subtitle">10 seconds to read a chart. Keep or kill? Your call could make or break the quarter.</p>
+        <h1>Chart-in-20</h1>
+        <p className="game-subtitle">20 seconds to read a chart. Keep or kill? Your call could make or break the quarter.</p>
       </div>
 
       {gameState === 'loading' && (
@@ -461,7 +479,7 @@ export default function ChartIn10Page() {
         <div className="game-state ready-state">
           <div className="ready-content">
             <h2>Ready to Analyze?</h2>
-            <p>You'll see a business chart with context. You have <strong>10 seconds</strong> to make the right call.</p>
+            <p>You'll see a business chart with context. You have <strong>20 seconds</strong> to make the right call.</p>
             <div className="game-rules">
               <h3>Scoring:</h3>
               <ul>
@@ -487,7 +505,7 @@ export default function ChartIn10Page() {
             <div className="timer-bar">
               <div 
                 className="timer-progress"
-                style={{ width: `${(timeLeft / 10) * 100}%` }}
+                style={{ width: `${(timeLeft / 20) * 100}%` }}
               />
             </div>
           </div>
@@ -537,6 +555,9 @@ export default function ChartIn10Page() {
                 <span className="score-number">{score}</span>
                 <span className="score-total">/3</span>
               </div>
+              <div className="performance-badge">
+                {score >= 3 ? '🏆 Chart Whisperer' : score === 2 ? '🎯 Solid Instincts' : '🔍 Keep Practicing'}
+              </div>
               <div className="score-breakdown">
                 {gameResults.selectedOption && (
                   <div className="score-item">
@@ -556,6 +577,12 @@ export default function ChartIn10Page() {
               </div>
             </div>
 
+            <div className="explanation-toggle">
+              <button className="toggle-explanation-btn" onClick={() => setShowExplanation(v => !v)}>
+                {showExplanation ? 'Hide Explanation' : 'Show Why This Was The Right Call'}
+              </button>
+            </div>
+
             {showExplanation && gameResults.scenario && (
               <div className="explanation-section">
                 <h3>The Right Call:</h3>
@@ -565,26 +592,28 @@ export default function ChartIn10Page() {
                   <h4>Your Analysis:</h4>
                   <p><strong>Chart:</strong> {gameResults.scenario.title}</p>
                   <p><strong>Your Decision:</strong> {gameResults.selectedOption?.text || 'No decision made'}</p>
-                  <p><strong>Time Used:</strong> {gameResults.timeUsed || 10} seconds</p>
+                  <p><strong>Time Used:</strong> {gameResults.timeUsed || 20} seconds</p>
                 </div>
               </div>
             )}
 
             <div className="results-actions">
-              <div className="social-sharing">
-                <h3>Share Your Analysis:</h3>
-                <div className="share-buttons">
-                  <button className="share-btn twitter" onClick={() => shareScore('twitter')}>
-                    Share on Twitter
-                  </button>
-                  <button className="share-btn linkedin" onClick={() => shareScore('linkedin')}>
-                    Share on LinkedIn
-                  </button>
-                  <button className="share-btn reddit" onClick={() => shareScore('reddit')}>
-                    Share on Reddit
-                  </button>
+              {appConfig.getFeatureFlag('ui.socialShare', true) && (
+                <div className="social-sharing">
+                  <h3>Share Your Analysis:</h3>
+                  <div className="share-buttons">
+                    <button className="share-btn twitter" onClick={() => shareScore('twitter')}>
+                      Share on Twitter
+                    </button>
+                    <button className="share-btn linkedin" onClick={() => shareScore('linkedin')}>
+                      Share on LinkedIn
+                    </button>
+                    <button className="share-btn reddit" onClick={() => shareScore('reddit')}>
+                      Share on Reddit
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="game-actions">
                 <button className="play-again-button" onClick={resetGame}>
@@ -594,10 +623,42 @@ export default function ChartIn10Page() {
                   Try Sprint Simulator →
                 </Link>
               </div>
+
+              {/* Feedback Form */}
+              <div className="feedback-form">
+                <h3 className="feedback-title">Help Us Improve</h3>
+                <textarea
+                  className="feedback-input"
+                  placeholder="How was this chart analysis? Any suggestions for improvement? Your input shapes our AI..."
+                  value={userFeedback}
+                  onChange={(e) => setUserFeedback(e.target.value)}
+                />
+                <div className="feedback-submit">
+                  <button onClick={submitUserFeedback} className="submit-button">Send Feedback</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       )}
     </div>
   );
+}
+
+export default function ChartIn20Page() {
+  // Gate by feature flag
+  if (!appConfig.getFeatureFlag('games.chart_in_20', true)) {
+    return (
+      <div className="chart-in-20-game" style={{ padding: '2rem' }}>
+        <div className="game-header">
+          <Link href="/" className="back-link">← Back to Games</Link>
+          <h1>Chart-in-20</h1>
+        </div>
+        <p>This game is currently unavailable.</p>
+        <p><Link href="/">Return to games</Link></p>
+      </div>
+    );
+  }
+
+  return <ChartIn20Game />;
 }

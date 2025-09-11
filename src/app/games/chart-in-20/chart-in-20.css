@@ -1,6 +1,6 @@
-/* Chart-in-10 - Modern Game Styling */
+/* Chart-in-20 - Modern Game Styling */
 
-.chart-in-10-game {
+.chart-in-20-game {
     max-width: 1200px;
     margin: 0 auto;
     padding: 120px 2rem 4rem;
@@ -644,6 +644,17 @@
     font-weight: 600;
 }
 
+.performance-badge {
+    display: inline-block;
+    margin-top: 0.5rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.95);
+    font-weight: 600;
+}
+
 .score-breakdown {
     display: flex;
     flex-direction: column;
@@ -701,6 +712,27 @@
 .scenario-recap p {
     margin-bottom: 0.5rem;
     color: rgba(255, 255, 255, 0.8);
+}
+
+.explanation-toggle {
+    margin: 1rem 0 2rem;
+    display: flex;
+    justify-content: center;
+}
+
+.toggle-explanation-btn {
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.6rem 1.25rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.toggle-explanation-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    transform: translateY(-1px);
 }
 
 /* Results Actions */
@@ -798,9 +830,45 @@
     transform: translateY(-2px);
 }
 
+/* Feedback form */
+.feedback-form {
+    margin-top: 1rem;
+    text-align: left;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 1.25rem;
+}
+
+.feedback-title {
+    color: white;
+    margin-bottom: 0.75rem;
+    font-size: 1.1rem;
+}
+
+.feedback-input {
+    width: 100%;
+    min-height: 100px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    color: white;
+    padding: 0.75rem;
+    resize: vertical;
+}
+
+.feedback-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.feedback-submit {
+    margin-top: 0.75rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
-    .chart-in-10-game {
+    .chart-in-20-game {
         padding: 100px 1rem 2rem;
     }
     

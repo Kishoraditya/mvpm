@@ -1,6 +1,7 @@
 'use client';
 
 import GameCard from '@/components/ui/GameCard';
+import appConfig from '@/lib/config';
 
 export default function GamesSection() {
   const games = [
@@ -26,20 +27,22 @@ export default function GamesSection() {
       href: '/games/assumption-sniper'
     },
     {
-      id: 'chart_in_10',
-      title: 'Chart-in-10',
-      description: '10 seconds to read a chart. Keep or kill? Your call could make or break the quarter.',
-      timer: 'LIGHTNING 10s',
-      href: '/games/chart-in-10'
+      id: 'chart_in_20',
+      title: 'Chart-in-20',
+      description: '20 seconds to read a chart. Keep or kill? Your call could make or break the quarter.',
+      timer: 'LIGHTNING 20s',
+      href: '/games/chart-in-20'
     }
   ];
+
+  const enabledGames = games.filter((g) => appConfig.getFeatureFlag(`games.${g.id}`, true));
 
   return (
     <section id="games" className="games-section">
       <h2 className="section-title">The Daily Gauntlet</h2>
       
       <div className="games-grid">
-        {games.map((game, index) => (
+        {enabledGames.map((game, index) => (
           <GameCard
             key={game.id}
             gameId={game.id}

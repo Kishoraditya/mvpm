@@ -9,8 +9,34 @@ class Analytics {
     };
   }
 
+  // New: central opt-out check
+  isOptedOut() {
+    if (typeof window === 'undefined') return false;
+    try {
+      const byEnv = !!appConfig.get('features.selfOptOut');
+      const byLocalStorage = localStorage.getItem('disable_posthog') === 'true';
+      return byEnv || byLocalStorage;
+    } catch {
+      return !!appConfig.get('features.selfOptOut');
+    }
+  }
+
   async init() {
     if (this.initialized || typeof window === 'undefined') return;
+
+    // Respect opt-out very early
+    if (this.isOptedOut()) {
+      const gaId = appConfig.get('analytics.googleAnalyticsId');
+      if (gaId) {
+        // Disable GA collection
+        window[`ga-disable-${gaId}`] = true;
+      }
+      this.initialized = true;
+      if (appConfig.get('features.enableDebug')) {
+        console.log('Analytics disabled by self opt-out');
+      }
+      return;
+    }
 
     // Initialize Google Analytics 4
     await this.initGA4();
@@ -29,10 +55,16 @@ class Analytics {
 
   async initGA4() {
     if (!appConfig.get('features.enableAnalytics')) return;
-    
+
     const gaId = appConfig.get('analytics.googleAnalyticsId');
     if (!gaId) {
       console.warn('Google Analytics ID not configured');
+      return;
+    }
+
+    // Respect opt-out
+    if (this.isOptedOut()) {
+      window[`ga-disable-${gaId}`] = true;
       return;
     }
 
@@ -45,7 +77,7 @@ class Analytics {
 
       // Initialize gtag
       window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
+      function gtag(){dataLayer.push(arguments);} 
       window.gtag = gtag;
       
       gtag('js', new Date());
@@ -73,6 +105,11 @@ class Analytics {
     
     if (!posthogKey) {
       console.warn('PostHog API key not configured');
+      return;
+    }
+
+    // Respect opt-out
+    if (this.isOptedOut()) {
       return;
     }
 

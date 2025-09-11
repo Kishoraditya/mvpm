@@ -5,6 +5,7 @@ import { useAnalytics } from '@/hooks/useAnalytics';
 import { trackGameInteraction } from '@/lib/supabase';
 import Link from 'next/link';
 import './sprint-simulator.css';
+import appConfig from '@/lib/config';
 
 // Game Data
 const TEAM_CAPACITY = 30;
@@ -60,7 +61,7 @@ const DAILY_EVENTS = [
     },
 ];
 
-export default function SprintSimulatorPage() {
+function SprintSimulatorGame() {
     const [gameState, setGameState] = useState('loading'); // loading, planning, sprint, results
     const [timeLeft, setTimeLeft] = useState(60); // 60 seconds for planning phase
     const [committedStories, setCommittedStories] = useState([]);
@@ -169,6 +170,10 @@ export default function SprintSimulatorPage() {
         startPlanningTimer();
     }, [trackEvent, startPlanningTimer]);
 
+    useEffect(() => {
+        initializeGame();
+    }, [initializeGame]);
+
     const runDay = useCallback(() => {
         if (currentDay > SPRINT_DAYS) {
             endSprint();
@@ -236,21 +241,6 @@ export default function SprintSimulatorPage() {
         }, 1000);
     };
 
-    useEffect(() => {
-        initializeGame();
-        return () => {
-            if (timerRef.current) {
-                clearInterval(timerRef.current);
-            }
-        };
-    }, [initializeGame]);
-
-    useEffect(() => {
-        if (gameState === 'sprint' && currentDay === 1 && !currentEvent) {
-            runDay();
-        }
-    }, [gameState, currentDay, currentEvent, runDay]);
-
     const restartGame = () => {
         setGameState('loading');
         initializeGame();
@@ -271,13 +261,13 @@ export default function SprintSimulatorPage() {
     };
 
     const setupSocialSharing = () => {
-        const shareText = `Just managed a ${SPRINT_DAYS}-day sprint and scored ${finalScore}/100! Think you can balance stakeholders, team morale, and delivery better? Try the Sprint Simulator`;
+        const shareText = `Just completed Sprint Simulator with a score of ${finalScore}/100! Can you balance delivery with team morale and stakeholders better?`;
         const url = typeof window !== 'undefined' ? window.location.href : '';
         
         return {
             linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}&text=${encodeURIComponent(shareText)}`,
             twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(url)}`,
-            reddit: `https://reddit.com/submit?url=${encodeURIComponent(url)}&title=${encodeURIComponent(shareText)}`
+            reddit: `https://reddit.com/submit?url=${encodeURIComponent(url)}&title=${encodeURIComponent(shareText)}`,
         };
     };
 
@@ -426,20 +416,22 @@ export default function SprintSimulatorPage() {
                                 <div className="feedback-text">{feedback}</div>
                             </div>
 
-                            <div className="social-share">
-                                <h3 className="social-title">🚀 Share Your Sprint Results</h3>
-                                <div className="social-buttons">
-                                    <a href={socialLinks.linkedin} className="social-btn linkedin" target="_blank" rel="noopener noreferrer">
-                                        <span>📊</span> LinkedIn
-                                    </a>
-                                    <a href={socialLinks.twitter} className="social-btn twitter" target="_blank" rel="noopener noreferrer">
-                                        <span>🐦</span> Twitter
-                                    </a>
-                                    <a href={socialLinks.reddit} className="social-btn reddit" target="_blank" rel="noopener noreferrer">
-                                        <span>🤖</span> Reddit
-                                    </a>
+                            {appConfig.getFeatureFlag('ui.socialShare', true) && (
+                                <div className="social-share">
+                                    <h3 className="social-title">🚀 Share Your Sprint Results</h3>
+                                    <div className="social-buttons">
+                                        <a href={socialLinks.linkedin} className="social-btn linkedin" target="_blank" rel="noopener noreferrer">
+                                            <span>📊</span> LinkedIn
+                                        </a>
+                                        <a href={socialLinks.twitter} className="social-btn twitter" target="_blank" rel="noopener noreferrer">
+                                            <span>🐦</span> Twitter
+                                        </a>
+                                        <a href={socialLinks.reddit} className="social-btn reddit" target="_blank" rel="noopener noreferrer">
+                                            <span>🤖</span> Reddit
+                                        </a>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
                             <div className="next-steps">
                                 <h3>🔥 Ready for more PM challenges?</h3>
@@ -474,4 +466,25 @@ export default function SprintSimulatorPage() {
             </div>
         </>
     );
+}
+
+export default function SprintSimulatorPage() {
+    // Gate by feature flag
+    if (!appConfig.getFeatureFlag('games.sprint_simulator', true)) {
+        return (
+            <div className="game-container" style={{ padding: '2rem' }}>
+                <header className="game-header-nav">
+                    <nav>
+                        <Link href="/" className="logo">iterate</Link>
+                        <Link href="/" className="back-home">← Back to Home</Link>
+                    </nav>
+                </header>
+                <h1>Sprint Simulator</h1>
+                <p>This game is currently unavailable.</p>
+                <p><Link href="/">Return to games</Link></p>
+            </div>
+        );
+    }
+
+    return <SprintSimulatorGame />;
 }

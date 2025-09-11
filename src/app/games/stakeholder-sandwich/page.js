@@ -5,6 +5,7 @@ import { useAnalytics } from '@/hooks/useAnalytics';
 import { trackGameInteraction } from '@/lib/supabase';
 import Link from 'next/link';
 import './stakeholder-sandwich.css';
+import appConfig from '@/lib/config';
 
 // Move scenarios outside the component
 const SCENARIOS = [
@@ -30,7 +31,7 @@ const SCENARIOS = [
   }
 ];
 
-export default function StakeholderSandwichPage() {
+function StakeholderSandwichGame() {
   const [gameState, setGameState] = useState('loading'); // loading, playing, results
   const [timeLeft, setTimeLeft] = useState(45);
   const [scenario, setScenario] = useState(null);
@@ -292,20 +293,22 @@ export default function StakeholderSandwichPage() {
                 <div className="feedback-text">{feedback}</div>
               </div>
 
-              <div className="social-share">
-                <h3 className="social-title">🚀 Share Your MVPM Moment</h3>
-                <div className="social-buttons">
-                  <a href={socialLinks.linkedin} className="social-btn linkedin" target="_blank" rel="noopener noreferrer">
-                    <span>📊</span> LinkedIn
-                  </a>
-                  <a href={socialLinks.twitter} className="social-btn twitter" target="_blank" rel="noopener noreferrer">
-                    <span>🐦</span> Twitter
-                  </a>
-                  <a href={socialLinks.reddit} className="social-btn reddit" target="_blank" rel="noopener noreferrer">
-                    <span>🤖</span> Reddit
-                  </a>
+              {appConfig.getFeatureFlag('ui.socialShare', true) && (
+                <div className="social-share">
+                  <h3 className="social-title">🚀 Share Your MVPM Moment</h3>
+                  <div className="social-buttons">
+                    <a href={socialLinks.linkedin} className="social-btn linkedin" target="_blank" rel="noopener noreferrer">
+                      <span>📊</span> LinkedIn
+                    </a>
+                    <a href={socialLinks.twitter} className="social-btn twitter" target="_blank" rel="noopener noreferrer">
+                      <span>🐦</span> Twitter
+                    </a>
+                    <a href={socialLinks.reddit} className="social-btn reddit" target="_blank" rel="noopener noreferrer">
+                      <span>🤖</span> Reddit
+                    </a>
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="next-steps">
                 <h3>🔥 This is just the beginning...</h3>
@@ -341,4 +344,26 @@ export default function StakeholderSandwichPage() {
       </div>
     </>
   );
+}
+
+export default function StakeholderSandwichPage() {
+  const isGameEnabled = appConfig.getFeatureFlag('games.stakeholder_sandwich', true);
+
+  if (!isGameEnabled) {
+    return (
+      <div className="game-container" style={{ padding: '2rem' }}>
+        <header className="game-header-nav">
+          <nav>
+            <Link href="/" className="logo">iterate</Link>
+            <Link href="/" className="back-home">← Back to Home</Link>
+          </nav>
+        </header>
+        <h1>Stakeholder Sandwich</h1>
+        <p>This game is currently unavailable.</p>
+        <p><Link href="/">Return to games</Link></p>
+      </div>
+    );
+  }
+
+  return <StakeholderSandwichGame />;
 }

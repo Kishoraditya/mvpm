@@ -7,6 +7,7 @@ import HowItWorksSection from '@/components/sections/HowItWorksSection'
 import FAQSection from '@/components/sections/FAQSection'
 import ComingSoonSection from '@/components/sections/ComingSoonSection'
 import SignupSection from '@/components/sections/SignupSection'
+import appConfig from '@/lib/config'
 
 export default function Home() {
   return (
@@ -17,7 +18,7 @@ export default function Home() {
         <HeroSection />
         <GamesSection />
         <HowItWorksSection />
-        <FAQSection />
+        {appConfig.getFeatureFlag('ui.faq', true) && <FAQSection />}
         <ComingSoonSection />
         <SignupSection />
       </main>
